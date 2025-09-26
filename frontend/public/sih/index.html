@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>स्वास्थ्य मित्र - Health Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .language-toggle {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .language-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+            position: relative;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin: 0 10px;
+            flex-shrink: 0;
+        }
+
+        .message.user .avatar {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            order: 2;
+        }
+
+        .message.bot .avatar {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .quick-options {
+            padding: 10px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .quick-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-btn {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .quick-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            font-style: italic;
+            color: #666;
+        }
+
+        .typing-dots {
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 60%, 100% { opacity: 1; }
+            30% { opacity: 0.3; }
+        }
+
+        .emergency-banner {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .health-card {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 1px solid #2196F3;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .health-card h4 {
+            color: #1976D2;
+            margin-bottom: 8px;
+        }
+
+        .health-card ul {
+            margin-left: 20px;
+            color: #333;
+        }
+
+        .vaccination-schedule {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border: 1px solid #FF9800;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .vaccination-schedule h4 {
+            color: #F57C00;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .header-title {
+                font-size: 20px;
+            }
+            
+            .language-toggle {
+                position: static;
+                transform: none;
+                margin-top: 10px;
+            }
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        .connection-status.offline {
+            background: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="emergency-banner" id="emergencyBanner">
+            🚨 For medical emergencies, call 108 immediately | आपातकाल में तुरंत 108 पर कॉल करें
+        </div>
+        
+        <div class="chat-header">
+            <div class="connection-status" id="connectionStatus"></div>
+            <div class="header-title" id="headerTitle">स्वास्थ्य मित्र - Health Companion</div>
+            <div class="header-subtitle" id="headerSubtitle">Your AI-powered healthcare education assistant</div>
+            <button class="language-toggle" id="languageToggle" onclick="toggleLanguage()">हिं/EN</button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <span class="typing-dots">AI is thinking...</span>
+        </div>
+
+        <div class="quick-options">
+            <div class="quick-buttons" id="quickButtons">
+            </div>
+            
+            <div class="chat-input-container">
+                <input 
+                    type="text" 
+                    id="chatInput" 
+                    class="chat-input" 
+                    placeholder="Ask about symptoms, vaccination, or health tips..."
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                    ➤
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isHindi = false;
+        let chatHistory = [];
+        let isConnected = false;
+
+        const content = {
+            en: {
+                headerTitle: "Health Companion",
+                headerSubtitle: "Your AI-powered healthcare education assistant",
+                inputPlaceholder: "Ask about symptoms, vaccination, or health tips...",
+                welcomeMessage: "Hello! I'm your Health Companion. I can help you with:\n• Disease symptoms and prevention\n• Vaccination schedules\n• General health advice\n• First aid information\n\nHow can I assist you today?",
+                quickButtons: [
+                    "Common Cold Symptoms",
+                    "Child Vaccination",
+                    "Diabetes Prevention",
+                    "Blood Pressure",
+                    "First Aid Tips"
+                ],
+                typingText: "AI is thinking...",
+                emergencyText: "🚨 For medical emergencies, call 108 immediately"
+            },
+            hi: {
+                headerTitle: "स्वास्थ्य मित्र",
+                headerSubtitle: "आपका AI-संचालित स्वास्थ्य शिक्षा सहायक",
+                inputPlaceholder: "लक्षण, टीकाकरण, या स्वास्थ्य सुझावों के बारे में पूछें...",
+                welcomeMessage: "नमस्ते! मैं आपका स्वास्थ्य मित्र हूं। मैं आपकी मदद कर सकता हूं:\n• रोग के लक्षण और बचाव\n• टीकाकरण कार्यक्रम\n• सामान्य स्वास्थ्य सलाह\n• प्राथमिक चिकित्सा जानकारी\n\nआज मैं आपकी कैसे सहायता कर सकता हूं?",
+                quickButtons: [
+                    "सर्दी के लक्षण",
+                    "बच्चों का टीकाकरण",
+                    "मधुमेह की रोकथाम",
+                    "रक्तचाप",
+                    "प्राथमिक चिकित्सा"
+                ],
+                typingText: "AI सोच रहा है...",
+                emergencyText: "🚨 आपातकाल में तुरंत 108 पर कॉल करें"
+            }
+        };
+
+        const healthDatabase = {
+            symptoms: {
+                "cold": {
+                    en: "Common cold symptoms include runny nose, sneezing, cough, and mild fever. Rest, stay hydrated, and consult a doctor if symptoms persist.",
+                    hi: "सामान्य सर्दी के लक्षणों में बहती नाक, छींक, खांसी और हल्का बुखार शामिल है। आराम करें, पानी पिएं, और यदि लक्षण बने रहें तो डॉक्टर से सलाह लें।"
+                },
+                "fever": {
+                    en: "Fever is body temperature above 100.4°F (38°C). Common causes include infections. Seek medical attention if fever exceeds 103°F or lasts more than 3 days.",
+                    hi: "बुखार का मतलब शरीर का तापमान 100.4°F (38°C) से ऊपर होना है। सामान्य कारणों में संक्रमण शामिल है। यदि बुखार 103°F से अधिक हो या 3 दिन से अधिक रहे तो चिकित्सा सहायता लें।"
+                }
+            },
+            vaccination: {
+                "child": {
+                    en: "Child vaccination schedule:\n• Birth: BCG, Hepatitis B\n• 6 weeks: DPT, Polio, Hepatitis B\n• 10 weeks: DPT, Polio\n• 14 weeks: DPT, Polio\n• 9 months: Measles\n• 15 months: MMR",
+                    hi: "बच्चों के टीकाकरण का कार्यक्रम:\n• जन्म के समय: BCG, हेपेटाइटिस B\n• 6 सप्ताह: DPT, पोलियो, हेपेटाइटिस B\n• 10 सप्ताह: DPT, पोलियो\n• 14 सप्ताह: DPT, पोलियो\n• 9 महीने: खसरा\n• 15 महीने: MMR"
+                }
+            },
+            prevention: {
+                "diabetes": {
+                    en: "Diabetes prevention tips:\n• Maintain healthy weight\n• Exercise regularly (30 min/day)\n• Eat balanced diet with less sugar\n• Regular health checkups\n• Avoid smoking and excessive alcohol",
+                    hi: "मधुमेह की रोकथाम के उपाय:\n• स्वस्थ वजन बनाए रखें\n• नियमित व्यायाम करें (30 मिनट/दिन)\n• कम चीनी के साथ संतुलित आहार लें\n• नियमित स्वास्थ्य जांच कराएं\n• धूम्रपान और अधिक शराब से बचें"
+                }
+            }
+        };
+
+        function initializeChatbot() {
+            updateLanguage();
+            addBotMessage(getCurrentContent().welcomeMessage);
+            updateQuickButtons();
+            
+            setTimeout(() => {
+                isConnected = true;
+                document.getElementById('connectionStatus').classList.remove('offline');
+            }, 2000);
+        }
+
+        function toggleLanguage() {
+            isHindi = !isHindi;
+            updateLanguage();
+            updateQuickButtons();
+        }
+
+        function updateLanguage() {
+            const currentContent = getCurrentContent();
+            document.getElementById('headerTitle').textContent = currentContent.headerTitle;
+            document.getElementById('headerSubtitle').textContent = currentContent.headerSubtitle;
+            document.getElementById('chatInput').placeholder = currentContent.inputPlaceholder;
+            document.getElementById('emergencyBanner').innerHTML = currentContent.emergencyText;
+        }
+
+        function getCurrentContent() {
+            return isHindi ? content.hi : content.en;
+        }
+
+        function updateQuickButtons() {
+            const quickButtonsContainer = document.getElementById('quickButtons');
+            const currentContent = getCurrentContent();
+            
+            quickButtonsContainer.innerHTML = '';
+            currentContent.quickButtons.forEach(buttonText => {
+                const button = document.createElement('button');
+                button.className = 'quick-btn';
+                button.textContent = buttonText;
+                button.onclick = () => sendQuickMessage(buttonText);
+                quickButtonsContainer.appendChild(button);
+            });
+        }
+
+        function addMessage(message, isUser = false) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = isUser ? '👤' : '🏥';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            if (!isUser && message.includes('•')) {
+                
+                content.innerHTML = message.replace(/\n/g, '<br>');
+            } else {
+                content.textContent = message;
+            }
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addBotMessage(message) {
+            addMessage(message, false);
+        }
+
+        function addUserMessage(message) {
+            addMessage(message, true);
+        }
+
+        function showTyping() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.style.display = 'block';
+            typingIndicator.querySelector('.typing-dots').textContent = getCurrentContent().typingText;
+        }
+
+        function hideTyping() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        // Get AI response from backend
+        async function getAIResponse(userMessage) {
+            try {
+                const response = await fetch('http://localhost:5000/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        language: isHindi ? 'hi' : 'en',
+                        user_id: 'web-user-' + Date.now()
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                return data.response;
+            } catch (error) {
+                console.error('Error connecting to backend:', error);
+                return generateResponse(userMessage.toLowerCase());
+            }
+        }
+
+        // Updated AI response function
+        function simulateAIResponse(userMessage) {
+            showTyping();
+            
+            getAIResponse(userMessage)
+                .then(response => {
+                    hideTyping();
+                    addBotMessage(response);
+                    isConnected = true;
+                    document.getElementById('connectionStatus').classList.remove('offline');
+                })
+                .catch(error => {
+                    hideTyping();
+                    const response = generateResponse(userMessage.toLowerCase());
+                    addBotMessage(response + "\n\n⚠️ Using offline mode - some features may be limited");
+                    isConnected = false;
+                    document.getElementById('connectionStatus').classList.add('offline');
+                });
+        }
+
+        function generateResponse(message) {
+            const currentLang = isHindi ? 'hi' : 'en';
+            
+            if (message.includes('cold') || message.includes('सर्दी')) {
+                return healthDatabase.symptoms.cold[currentLang];
+            }
+            
+            if (message.includes('fever') || message.includes('बुखार')) {
+                return healthDatabase.symptoms.fever[currentLang];
+            }
+            
+            if (message.includes('vaccination') || message.includes('टीकाकरण') || message.includes('vaccine')) {
+                return createVaccinationCard(healthDatabase.vaccination.child[currentLang]);
+            }
+            
+            if (message.includes('diabetes') || message.includes('मधुमेह')) {
+                return createHealthCard("Diabetes Prevention | मधुमेह की रोकथाम", healthDatabase.prevention.diabetes[currentLang]);
+            }
+            
+            if (message.includes('blood pressure') || message.includes('रक्तचाप')) {
+                return currentLang === 'hi' 
+                    ? "रक्तचाप की जांच:\n• सामान्य: 120/80 mmHg से कम\n• नियमित जांच कराएं\n• कम नमक खाएं\n• व्यायाम करें\n• तनाव कम करें"
+                    : "Blood pressure monitoring:\n• Normal: Less than 120/80 mmHg\n• Regular checkups\n• Reduce salt intake\n• Exercise regularly\n• Manage stress";
+            }
+            
+            if (message.includes('first aid') || message.includes('प्राथमिक चिकित्सा')) {
+                return currentLang === 'hi'
+                    ? "प्राथमिक चिकित्सा मूल बातें:\n• घाव को साफ पानी से धोएं\n• दबाव डालकर खून रोकें\n• जलने पर ठंडा पानी लगाएं\n• बेहोशी में व्यक्ति को करवट पर लिटाएं\n• गंभीर स्थिति में 108 पर कॉल करें"
+                    : "First aid basics:\n• Clean wounds with water\n• Apply pressure to stop bleeding\n• Use cold water for burns\n• Place unconscious person in recovery position\n• Call 108 for serious conditions";
+            }
+            
+            return currentLang === 'hi'
+                ? "मुझे खुशी होगी आपकी मदद करने में! कृपया अधिक विशिष्ट प्रश्न पूछें जैसे कि लक्षण, टीकाकरण, या रोकथाम के बारे में। आप ऊपर दिए गए बटन का भी उपयोग कर सकते हैं।"
+                : "I'd be happy to help you! Please ask more specific questions about symptoms, vaccination schedules, or prevention tips. You can also use the quick buttons above.";
+        }
+
+        function createHealthCard(title, content) {
+            return `📋 ${title}\n\n${content}`;
+        }
+
+        function createVaccinationCard(content) {
+            return `💉 Vaccination Schedule | टीकाकरण कार्यक्रम\n\n${content}`;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            addUserMessage(message);
+            input.value = '';
+            
+            chatHistory.push({user: message, timestamp: new Date()});
+            
+            simulateAIResponse(message);
+        }
+
+        function sendQuickMessage(message) {
+            document.getElementById('chatInput').value = message;
+            sendMessage();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function startBackendServer() {
+            try {
+                // Try to start the Flask backend
+                const response = await fetch('/api/start-backend', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    console.log('Backend server started successfully');
+                } else {
+                    console.log('Backend might already be running or starting manually...');
+                }
+            } catch (error) {
+                console.log('Backend startup request failed, assuming manual start');
+            }
+        }
+
+        window.onload = async function() {
+            // Try to start backend server
+            await startBackendServer();
+            await initializeChatbot();
+            addEmergencyButton();
+        };
+
+        setInterval(() => {
+            if (Math.random() < 0.1 && chatHistory.length > 0 && isConnected) {
+                showPeriodicHealthTip();
+            }
+        }, 45000); 
+
+        function monitorNetworkStatus() {
+            setInterval(async () => {
+                try {
+                    const response = await fetch('http://localhost:5000/api/health-tips?lang=en', { 
+                        method: 'HEAD',
+                        signal: AbortSignal.timeout(5000) // 5 second timeout
+                    });
+                    
+                    if (response.ok && !isConnected) {
+                        isConnected = true;
+                        document.getElementById('connectionStatus').classList.remove('offline');
+                        addBotMessage(isHindi ? 
+                            "✅ बैकएंड से कनेक्शन पुनर्स्थापित!" : 
+                            "✅ Backend connection restored!");
+                    }
+                } catch (error) {
+                    if (isConnected) {
+                        isConnected = false;
+                        document.getElementById('connectionStatus').classList.add('offline');
+                        addBotMessage(isHindi ? 
+                            "⚠️ बैकएंड कनेक्शन खो गया - ऑफलाइन मोड में स्विच हो रहा है" : 
+                            "⚠️ Backend connection lost - switching to offline mode");
+                    }
+                }
+            }, 30000);
+        }
+
+        async function searchDiseases(query) {
+            try {
+                const lang = isHindi ? 'hi' : 'en';
+                const response = await fetch(`http://localhost:5000/api/diseases?q=${encodeURIComponent(query)}&lang=${lang}`);
+                const data = await response.json();
+                return data.diseases;
+            } catch (error) {
+                console.error('Error searching diseases:', error);
+                return [];
+            }
+        }
+
+        async function getVaccinations(ageGroup = '') {
+            try {
+                const lang = isHindi ? 'hi' : 'en';
+                const response = await fetch(`http://localhost:5000/api/vaccinations?age_group=${encodeURIComponent(ageGroup)}&lang=${lang}`);
+                const data = await response.json();
+                return data.vaccinations;
+            } catch (error) {
+                console.error('Error fetching vaccinations:', error);
+                return [];
+            }
+        }
+
+        async function getHealthTips() {
+            try {
+                const lang = isHindi ? 'hi' : 'en';
+                const response = await fetch(`http://localhost:5000/api/health-tips?lang=${lang}`);
+                const data = await response.json();
+                return data.tips;
+            } catch (error) {
+                console.error('Error fetching health tips:', error);
+                return [];
+            }
+        }
+
+        async function getEmergencyInfo() {
+            try {
+                const lang = isHindi ? 'hi' : 'en';
+                const response = await fetch(`http://localhost:5000/api/emergency?lang=${lang}`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching emergency info:', error);
+                return null;
+            }
+        }
+
+        async function sendQuickMessageWithAPI(message) {
+            document.getElementById('chatInput').value = message;
+            
+            if (message.includes('Vaccination') || message.includes('टीकाकरण')) {
+                try {
+                    showTyping();
+                    const vaccines = await getVaccinations();
+                    hideTyping();
+                    
+                    if (vaccines.length > 0) {
+                        let response = isHindi ? 
+                            "यहाँ टीकाकरण की जानकारी है:\n\n" : 
+                            "Here's the vaccination information:\n\n";
+                        
+                        vaccines.slice(0, 3).forEach(vaccine => {
+                            response += `🔸 ${vaccine.vaccine_name}\n`;
+                            response += `   ${isHindi ? 'आयु समूह:' : 'Age group:'} ${vaccine.age_group}\n`;
+                            response += `   ${isHindi ? 'कार्यक्रम:' : 'Schedule:'} ${vaccine.schedule}\n\n`;
+                        });
+                        
+                        addUserMessage(message);
+                        addBotMessage(response);
+                        return;
+                    }
+                } catch (error) {
+                    console.error('API call failed, falling back to regular chat');
+                }
+            }
+            
+            sendMessage();
+        }
+
+        async function initializeChatbot() {
+            updateLanguage();
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/health-tips?lang=en');
+                if (response.ok) {
+                    isConnected = true;
+                    document.getElementById('connectionStatus').classList.remove('offline');
+                    addBotMessage(getCurrentContent().welcomeMessage + "\n\n✅ Connected to AI backend");
+                } else {
+                    throw new Error('Backend not responding');
+                }
+            } catch (error) {
+                isConnected = false;
+                document.getElementById('connectionStatus').classList.add('offline');
+                addBotMessage(getCurrentContent().welcomeMessage + "\n\n⚠️ Running in offline mode - limited functionality");
+            }
+            
+            updateQuickButtons();
+        }
+
+        function updateQuickButtons() {
+            const quickButtonsContainer = document.getElementById('quickButtons');
+            const currentContent = getCurrentContent();
+            
+            quickButtonsContainer.innerHTML = '';
+            currentContent.quickButtons.forEach(buttonText => {
+                const button = document.createElement('button');
+                button.className = 'quick-btn';
+                button.textContent = buttonText;
+                button.onclick = () => isConnected ? 
+                    sendQuickMessageWithAPI(buttonText) : 
+                    sendQuickMessage(buttonText);
+                quickButtonsContainer.appendChild(button);
+            });
+        }
+
+        function addEmergencyButton() {
+            const quickButtonsContainer = document.getElementById('quickButtons');
+            const emergencyBtn = document.createElement('button');
+            emergencyBtn.className = 'quick-btn';
+            emergencyBtn.style.background = 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)';
+            emergencyBtn.textContent = isHindi ? '🚨 आपातकाल' : '🚨 Emergency';
+            emergencyBtn.onclick = showEmergencyInfo;
+            quickButtonsContainer.appendChild(emergencyBtn);
+        }
+        async function showEmergencyInfo() {
+            try {
+                const emergencyData = await getEmergencyInfo();
+                if (emergencyData) {
+                    const message = `🚨 ${isHindi ? 'आपातकालीन संपर्क:' : 'Emergency Contacts:'}\n\n` +
+                        `🚑 ${isHindi ? 'एम्बुलेंस:' : 'Ambulance:'} ${emergencyData.ambulance}\n` +
+                        `👮 ${isHindi ? 'पुलिस:' : 'Police:'} ${emergencyData.police}\n` +
+                        `🚒 ${isHindi ? 'फायर:' : 'Fire:'} ${emergencyData.fire}\n\n` +
+                        emergencyData.message;
+                    
+                    addBotMessage(message);
+                } else {
+                    const fallback = isHindi ?
+                        "🚨 आपातकालीन संपर्क:\n🚑 एम्बुलेंस: 108\n👮 पुलिस: 100\n🚒 फायर: 101" :
+                        "🚨 Emergency Contacts:\n🚑 Ambulance: 108\n👮 Police: 100\n🚒 Fire: 101";
+                    addBotMessage(fallback);
+                }
+            } catch (error) {
+                const fallback = isHindi ?
+                    "🚨 आपातकाल में तुरंत 108 पर कॉल करें!" :
+                    "🚨 For emergencies, call 108 immediately!";
+                addBotMessage(fallback);
+            }
+        }
+
+        async function showPeriodicHealthTip() {
+            try {
+                const tips = await getHealthTips();
+                if (tips && tips.length > 0) {
+                    const randomTip = tips[Math.floor(Math.random() * tips.length)];
+                    addBotMessage(`💡 ${isHindi ? 'स्वास्थ्य सुझाव:' : 'Health Tip:'} ${randomTip}`);
+                }
+            } catch (error) {
+                const localTips = [
+                    {
+                        en: "💡 Health Tip: Drink at least 8 glasses of water daily to stay hydrated!",
+                        hi: "💡 स्वास्थ्य सुझाव: हाइड्रेटेड रहने के लिए दिन में कम से कम 8 गिलास पानी पिएं!"
+                    },
+                    {
+                        en: "💡 Health Tip: Wash your hands frequently to prevent infections!",
+                        hi: "💡 स्वास्थ्य सुझाव: संक्रमण से बचने के लिए अपने हाथ बार-बार धोएं!"
+                    }
+                ];
+                
+                const randomTip = localTips[Math.floor(Math.random() * localTips.length)];
+                const currentLang = isHindi ? 'hi' : 'en';
+                addBotMessage(randomTip[currentLang]);
+            }
+        }
+        setTimeout(monitorNetworkStatus, 10000); // Start after 10 seconds
+    </script>
+</body>
+</html>

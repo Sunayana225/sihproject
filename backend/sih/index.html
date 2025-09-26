@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>স্বাস্থ্য মিত্র - Health Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .language-selector {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .language-dropdown {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .language-dropdown:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .language-dropdown option {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .notification-bell {
+            position: relative;
+            margin-right: 15px;
+            cursor: pointer;
+            color: white;
+            font-size: 18px;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .notification-bell:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .notification-dropdown.show {
+            display: block;
+            animation: dropdownSlide 0.3s ease-out;
+        }
+
+        @keyframes dropdownSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .notification-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .notification-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .notification-item:hover {
+            background: #f8f9fa;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item.unread {
+            background: #e3f2fd;
+            border-left: 3px solid #2196F3;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .notification-content {
+            color: #666;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .notification-date {
+            color: #999;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .notification-actions {
+            padding: 10px 15px;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+
+        .mark-all-read {
+            background: none;
+            border: none;
+            color: #4CAF50;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .mark-all-read:hover {
+            background: #f0f8f0;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+            position: relative;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin: 0 10px;
+            flex-shrink: 0;
+        }
+
+        .message.user .avatar {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            order: 2;
+        }
+
+        .message.bot .avatar {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .quick-options {
+            padding: 10px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            font-style: italic;
+            color: #666;
+        }
+
+        .typing-dots {
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 60%, 100% { opacity: 1; }
+            30% { opacity: 0.3; }
+        }
+
+        .emergency-banner {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .header-title {
+                font-size: 20px;
+            }
+            
+            .language-selector {
+                position: static;
+                transform: none;
+                margin-top: 10px;
+            }
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        .connection-status.offline {
+            background: #f44336;
+        }
+
+        /* Formatted Content Styles */
+        .section-title {
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 15px 0 8px 0;
+            font-size: 16px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+
+        .formatted-list {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .formatted-list li {
+            margin: 8px 0;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .text-section {
+            margin: 10px 0;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .warning-section {
+            background: linear-gradient(135deg, #ff5722 0%, #f44336 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(244, 67, 54, 0.3);
+        }
+
+        .table-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #4CAF50;
+        }
+
+        /* Enhanced message content for better readability */
+        .message.bot .message-content {
+            max-width: 80%;
+        }
+
+        @media (max-width: 768px) {
+            .message.bot .message-content {
+                max-width: 90%;
+            }
+            
+            .section-title {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="emergency-banner" id="emergencyBanner">
+            🚨 For medical emergencies, call 108 immediately | আপৎকালীন অবস্থায় ১০৮ নম্বরে কল করুন
+        </div>
+        
+        <div class="chat-header">
+            <div class="connection-status" id="connectionStatus"></div>
+            <div class="header-title" id="headerTitle">স্বাস্থ্য মিত্র - Health Companion</div>
+            <div class="header-subtitle" id="headerSubtitle">Your AI-powered healthcare education assistant</div>
+            <div class="language-selector">
+                <div class="notification-bell" onclick="toggleNotifications()" style="display: inline-block;">
+                    🔔
+                    <span class="notification-badge" id="notificationBadge">3</span>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="notification-header">
+                            <h3 id="notificationTitle">Notifications</h3>
+                        </div>
+                        <div id="notificationList">
+                            <!-- Notifications will be populated by JavaScript -->
+                        </div>
+                        <div class="notification-actions">
+                            <button class="mark-all-read" onclick="markAllAsRead()" id="markAllReadBtn">Mark all as read</button>
+                        </div>
+                    </div>
+                </div>
+                <select class="language-dropdown" id="languageSelector" onchange="changeLanguage()">
+                    <option value="en">English</option>
+                    <option value="hi">हिन्दी</option>
+                    <option value="bn">বাংলা</option>
+                    <option value="ta">தமிழ்</option>
+                    <option value="te">తెలుగు</option>
+                    <option value="mr">मराठी</option>
+                    <option value="gu">ગુજરાતી</option>
+                    <option value="kn">ಕನ್ನಡ</option>
+                    <option value="ml">മലയാളം</option>
+                    <option value="pa">ਪੰਜਾਬੀ</option>
+                    <option value="or">ଓଡିଆ</option>
+                    <option value="as">অসমীয়া</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <span class="typing-dots">AI is thinking...</span>
+        </div>
+
+        <div class="quick-options">
+            <div class="chat-input-container">
+                <input 
+                    type="text" 
+                    id="chatInput" 
+                    class="chat-input" 
+                    placeholder="Ask about symptoms, vaccination, or health tips..."
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                    ➤
+                </button>
+            </div>
+        </div>
+    </div>
+
+   <script>
+        let currentLanguage = 'en';
+        let isConnected = false;
+
+        // Notification System
+        const notifications = [
+            {
+                id: 1,
+                type: 'vaccination',
+                title: 'COVID-19 Vaccination Drive',
+                content: 'Free COVID-19 booster shots available at nearby health centers this week.',
+                date: '2024-01-15',
+                read: false,
+                priority: 'high'
+            },
+            {
+                id: 2,
+                type: 'vaccination',
+                title: 'Flu Vaccination Reminder',
+                content: 'Annual flu vaccination recommended for all age groups. Book your appointment now.',
+                date: '2024-01-12',
+                read: false,
+                priority: 'medium'
+            },
+            {
+                id: 3,
+                type: 'health_alert',
+                title: 'Health Checkup Camp',
+                content: 'Free health checkup camp organized by local health department this weekend.',
+                date: '2024-01-10',
+                read: true,
+                priority: 'low'
+            }
+        ];
+
+        function updateNotificationBadge() {
+            const unreadCount = notifications.filter(n => !n.read).length;
+            const badge = document.getElementById('notificationBadge');
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.toggle('show');
+            if (dropdown.classList.contains('show')) {
+                renderNotifications();
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!e.target.closest('.notification-bell')) {
+                    dropdown.classList.remove('show');
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+        }
+
+        function renderNotifications() {
+            const notificationList = document.getElementById('notificationList');
+            const currentContent = content[currentLanguage];
+            
+            if (notifications.length === 0) {
+                notificationList.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #666;">
+                        ${currentContent.noNotifications || 'No notifications'}
+                    </div>
+                `;
+                return;
+            }
+
+            notificationList.innerHTML = notifications.map(notification => `
+                <div class="notification-item ${notification.read ? '' : 'unread'}" onclick="markAsRead(${notification.id})">
+                    <div class="notification-title">${getLocalizedNotificationTitle(notification)}</div>
+                    <div class="notification-content">${getLocalizedNotificationContent(notification)}</div>
+                    <div class="notification-date">${formatDate(notification.date)}</div>
+                </div>
+            `).join('');
+        }
+
+        function getLocalizedNotificationTitle(notification) {
+            const translations = {
+                'COVID-19 Vaccination Drive': {
+                    hi: 'COVID-19 टीकाकरण अभियान',
+                    bn: 'COVID-19 টিকাকরণ অভিযান',
+                    ta: 'COVID-19 தடுப்பூசி பிரச்சாரம்',
+                    te: 'COVID-19 వ్యాక్సినేషన్ డ్రైవ్',
+                    mr: 'COVID-19 लसीकरण मोहीम',
+                    gu: 'COVID-19 રસીકરણ અભિયાન',
+                    kn: 'COVID-19 ಲಸಿಕೆ ಅಭಿಯಾನ',
+                    ml: 'COVID-19 വാക്സിനേഷൻ കാമ്പെയ്ൻ'
+                },
+                'Flu Vaccination Reminder': {
+                    hi: 'फ्लू टीकाकरण अनुस्मारक',
+                    bn: 'ফ্লু টিকাকরণ অনুস্মারক',
+                    ta: 'காய்ச்சல் தடுப்பூசி நினைவூட்டல்',
+                    te: 'ఫ్లూ వ్యాక్సినేషన్ రిమైండర్',
+                    mr: 'फ्लू लसीकरण स्मरणपत्र',
+                    gu: 'ફ્લુ રસીકરણ રીમાઇન્ડર',
+                    kn: 'ಫ್ಲೂ ಲಸಿಕೆ ಜ್ಞಾಪನೆ',
+                    ml: 'ഫ്ലൂ വാക്സിനേഷൻ റിമൈൻഡർ'
+                },
+                'Health Checkup Camp': {
+                    hi: 'स्वास्थ्य जांच शिविर',
+                    bn: 'স্বাস্থ্য পরীক্ষা শিবির',
+                    ta: 'சுகாதார பரிசோதனை முகாம்',
+                    te: 'ఆరోగ్య తనిఖీ శిబిరం',
+                    mr: 'आरोग्य तपासणी शिबीर',
+                    gu: 'આરોગ્ય તપાસ શિબિર',
+                    kn: 'ಆರೋಗ್ಯ ಪರೀಕ್ಷಾ ಶಿಬಿರ',
+                    ml: 'ആരോഗ്യ പരിശോധന ക്യാമ്പ്'
+                }
+            };
+
+            return translations[notification.title]?.[currentLanguage] || notification.title;
+        }
+
+        function getLocalizedNotificationContent(notification) {
+            const translations = {
+                'Free COVID-19 booster shots available at nearby health centers this week.': {
+                    hi: 'इस सप्ताह नजदीकी स्वास्थ्य केंद्रों में मुफ्त COVID-19 बूस्टर शॉट उपलब्ध हैं।',
+                    bn: 'এই সপ্তাহে কাছাকাছি স্বাস্থ্য কেন্দ্রগুলিতে বিনামূল্যে COVID-19 বুস্টার শট উপলব্ধ।',
+                    ta: 'இந்த வாரம் அருகிலுள்ள சுகாதார மையங்களில் இலவச COVID-19 பூஸ்டர் ஷாட்கள் கிடைக்கின்றன।',
+                    te: 'ఈ వారం సమీపంలోని ఆరోగ్య కేంద్రాలలో ఉచిత COVID-19 బూస్టర్ షాట్లు అందుబాటులో ఉన్నాయి।',
+                    mr: 'या आठवड्यात जवळच्या आरोग्य केंद्रांमध्ये मोफत COVID-19 बूस्टर शॉट उपलब्ध आहेत।',
+                    gu: 'આ અઠવાડિયે નજીકના આરોગ્ય કેન્દ્રોમાં મફત COVID-19 બૂસ્ટર શોટ ઉપલબ્ધ છે।',
+                    kn: 'ಈ ವಾರ ಹತ್ತಿರದ ಆರೋಗ್ಯ ಕೇಂದ್ರಗಳಲ್ಲಿ ಉಚಿತ COVID-19 ಬೂಸ್ಟರ್ ಶಾಟ್‌ಗಳು ಲಭ್ಯವಿವೆ।',
+                    ml: 'ഈ ആഴ്ച അടുത്തുള്ള ആരോഗ്യ കേന്ദ്രങ്ങളിൽ സൗജന്യ COVID-19 ബൂസ്റ്റർ ഷോട്ടുകൾ ലഭ്യമാണ്।'
+                }
+            };
+
+            return translations[notification.content]?.[currentLanguage] || notification.content;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) return currentLanguage === 'hi' ? 'कल' : currentLanguage === 'bn' ? 'গতকাল' : 'Yesterday';
+            if (diffDays <= 7) return `${diffDays} ${currentLanguage === 'hi' ? 'दिन पहले' : currentLanguage === 'bn' ? 'দিন আগে' : 'days ago'}`;
+            return date.toLocaleDateString();
+        }
+
+        function markAsRead(notificationId) {
+            const notification = notifications.find(n => n.id === notificationId);
+            if (notification && !notification.read) {
+                notification.read = true;
+                updateNotificationBadge();
+                renderNotifications();
+                
+                // Show toast notification
+                showToast(content[currentLanguage].notificationRead || 'Notification marked as read');
+            }
+        }
+
+        function markAllAsRead() {
+            notifications.forEach(n => n.read = true);
+            updateNotificationBadge();
+            renderNotifications();
+            
+            showToast(content[currentLanguage].allNotificationsRead || 'All notifications marked as read');
+        }
+
+        function showToast(message) {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #4CAF50;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        const content = {
+            en: {
+                headerTitle: "Health Companion",
+                headerSubtitle: "Your AI-powered healthcare education assistant",
+                inputPlaceholder: "Ask about symptoms, vaccination, or health tips...",
+                welcomeMessage: "Hello! I'm your Health Companion. I can help you with:\n• Disease symptoms and prevention\n• Vaccination schedules\n• General health advice\n• First aid information\n\nHow can I assist you today?",
+                quickButtons: [
+                    "Common Cold Symptoms",
+                    "Child Vaccination",
+                    "Diabetes Prevention",
+                    "Blood Pressure",
+                    "First Aid Tips"
+                ],
+                typingText: "AI is thinking...",
+                emergencyText: "🚨 For medical emergencies, call 108 immediately",
+                notificationTitle: "Notifications",
+                noNotifications: "No notifications",
+                notificationRead: "Notification marked as read",
+                allNotificationsRead: "All notifications marked as read",
+                markAllRead: "Mark all as read"
+            },
+            hi: {
+                headerTitle: "स्वास्थ्य मित्र",
+                headerSubtitle: "आपका AI-संचालित स्वास्थ्य शिक्षा सहायक",
+                inputPlaceholder: "लक्षण, टीकाकरण, या स्वास्थ्य सुझावों के बारे में पूछें...",
+                welcomeMessage: "नमस्ते! मैं आपका स्वास्थ्य मित्र हूँ। मैं आपकी मदद कर सकता हूँ:\n• रोग के लक्षण और बचाव\n• टीकाकरण कार्यक्रम\n• सामान्य स्वास्थ्य सलाह\n• प्राथमिक चिकित्सा जानकारी\n\nआज मैं आपकी कैसे सहायता कर सकता हूँ?",
+                quickButtons: [
+                    "सर्दी के लक्षण",
+                    "बच्चों का टीकाकरण",
+                    "मधुमेह की रोकथाम",
+                    "रक्तचाप",
+                    "प्राथमिक चिकित्सा"
+                ],
+                typingText: "AI सोच रहा है...",
+                emergencyText: "🚨 आपातकाल में तुरंत 108 पर कॉल करें",
+                notificationTitle: "सूचनाएं",
+                noNotifications: "कोई सूचना नहीं",
+                notificationRead: "सूचना को पढ़ा गया के रूप में चिह्नित किया गया",
+                allNotificationsRead: "सभी सूचनाओं को पढ़ा गया के रूप में चिह्नित किया गया",
+                markAllRead: "सभी को पढ़ा गया के रूप में चिह्नित करें"
+            },
+            bn: {
+                headerTitle: "স্বাস্থ্য মিত্র",
+                headerSubtitle: "আপনার AI-চালিত স্বাস্থ্যসেবা শিক্ষা সহায়ক",
+                inputPlaceholder: "উপসর্গ, টিকাদান, বা স্বাস্থ্য পরামর্শ সম্পর্কে জিজ্ঞাসা করুন...",
+                welcomeMessage: "নমস্কার! আমি আপনার স্বাস্থ্য মিত্র। আমি আপনাকে সাহায্য করতে পারি:\n• রোগের উপসর্গ ও প্রতিরোধ\n• টিকাদানের সময়সূচী\n• সাধারণ স্বাস্থ্য পরামর্শ\n• প্রাথমিক চিকিৎসার তথ্য\n\nআজ আমি কীভাবে আপনাকে সহায়তা করতে পারি?",
+                quickButtons: [
+                    "সর্দির উপসর্গ",
+                    "শিশু টিকাদান",
+                    "ডায়াবেটিস প্রতিরোধ",
+                    "রক্তচাপ",
+                    "প্রাথমিক চিকিৎসা"
+                ],
+                typingText: "AI চিন্তা করছে...",
+                emergencyText: "🚨 জরুরি অবস্থায় অবিলম্বে ১০৮ নম্বরে কল করুন",
+                notificationTitle: "বিজ্ঞপ্তি",
+                noNotifications: "কোন বিজ্ঞপ্তি নেই",
+                notificationRead: "বিজ্ঞপ্তি পড়া হিসেবে চিহ্নিত",
+                allNotificationsRead: "সব বিজ্ঞপ্তি পড়া হিসেবে চিহ্নিত",
+                markAllRead: "সব পড়া হিসেবে চিহ্নিত করুন"
+            },
+            ta: {
+                headerTitle: "உடல்நலம் தோழர்",
+                headerSubtitle: "உங்கள் AI-இயங்கும் சுகாதார கல்வி உதவியாளர்",
+                inputPlaceholder: "அறிகுறிகள், தடுப்பூசி அல்லது உடல்நலக் குறிப்புகளைப் பற்றிக் கேளுங்கள்...",
+                welcomeMessage: "வணக்கம்! நான் உங்கள் உடல்நலம் தோழர். நான் உங்களுக்கு உதவ முடியும்:\n• நோய் அறிகுறிகள் மற்றும் தடுப்பு\n• தடுப்பூசி அட்டவணை\n• பொதுவான உடல்நல ஆலோசனை\n• முதலுதவி தகவல்\n\nஇன்று நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?",
+                quickButtons: [
+                    "சளி அறிகுறிகள்",
+                    "குழந்தைகளுக்கான தடுப்பூசி",
+                    "நீரிழிவு தடுப்பு",
+                    "இரத்த அழுத்தம்",
+                    "முதலுதவி குறிப்புகள்"
+                ],
+                typingText: "AI யோசித்துக் கொண்டிருக்கிறது...",
+                emergencyText: "🚨 மருத்துவ அவசரநிலைக்கு உடனடியாக 108 ஐ அழையுங்கள்"
+            },
+            te: {
+                headerTitle: "ఆరోగ్య మిత్రుడు",
+                headerSubtitle: "మీ AI-ఆధారిత ఆరోగ్య విద్యా సహాయకుడు",
+                inputPlaceholder: "లక్షణాలు, టీకాలు లేదా ఆరోగ్య చిట్కాల గురించి అడగండి...",
+                welcomeMessage: "నమస్కారం! నేను మీ ఆరోగ్య మిత్రుడను. నేను మీకు సహాయం చేయగలను:\n• వ్యాధి లక్షణాలు మరియు నివారణ\n• టీకా కార్యక్రమలు\n• సాధారణ ఆరోగ్య సలహా\n• ప్రాథమిక చికిత్స సమాచారం\n\nఈరోజు నేను మీకు ఎలా సహాయం చేయగలను?",
+                quickButtons: [
+                    "జలుబు లక్షణాలు",
+                    "పిల్లల టీకాలు",
+                    "మధుమేహ నివారణ",
+                    "రక్తపోటు",
+                    "ప్రాథమిక చికిత్స"
+                ],
+                typingText: "AI ఆలోచిస్తోంది...",
+                emergencyText: "🚨 వైద్య అత్యవసర పరిస్థితుల్లో వెంటనే 108కు కాల్ చేయండి"
+            },
+            mr: {
+                headerTitle: "आरोग्य मित्र",
+                headerSubtitle: "तुमचा AI-चालित आरोग्य शिक्षण सहाय्यक",
+                inputPlaceholder: "लक्षणे, लसीकरण किंवा आरोग्य सल्ल्यांबद्दल विचारा...",
+                welcomeMessage: "नमस्कार! मी तुमचा आरोग्य मित्र आहे। मी तुम्हाला मदत करू शकतो:\n• रोगाची लक्षणे आणि प्रतिबंध\n• लसीकरण वेळापत्रक\n• सामान्य आरोग्य सल्ला\n• प्राथमिक उपचार माहिती\n\nआज मी तुम्हाला कशी मदत करू शकतो?",
+                quickButtons: [
+                    "सर्दीची लक्षणे",
+                    "मुलांचे लसीकरण",
+                    "मधुमेह प्रतिबंध",
+                    "रक्तदाब",
+                    "प्राथमिक उपचार"
+                ],
+                typingText: "AI विचार करत आहे...",
+                emergencyText: "🚨 वैद्यकीय आपत्कालीन परिस्थितीत त्वरित 108 वर कॉल करा"
+            },
+            gu: {
+                headerTitle: "સ્વાસ્થ્ય મિત્ર",
+                headerSubtitle: "તમારા AI-સંચાલિત આરોગ્ય શિક્ષણ સહાયક",
+                inputPlaceholder: "લક્ષણો, રસીકરણ અથવા સ્વાસ્થ્ય સૂચનો વિશે પૂછો...",
+                welcomeMessage: "નમસ્કાર! હું તમારો સ્વાસ્થ્ય મિત્ર છું. હું તમારી મદદ કરી શકું છું:\n• રોગના લક્ષણો અને નિવારણ\n• રસીકરણ કાર્યક્રમ\n• સામાન્ય સ્વાસ્થ્ય સલાહ\n• પ્રાથમિક સારવાર માહિતી\n\nઆજે હું તમારી કેવી રીતે સહાય કરી શકું?",
+                quickButtons: [
+                    "શરદીના લક્ષણો",
+                    "બાળકોનું રસીકરણ",
+                    "ડાયાબિટીસ નિવારણ",
+                    "બ્લડ પ્રેશર",
+                    "પ્રાથમિક સારવાર"
+                ],
+                typingText: "AI વિચારી રહ્યું છે...",
+                emergencyText: "🚨 તબીબી કટોકટી માટે તુરંત 108 પર કૉલ કરો"
+            },
+            kn: {
+                headerTitle: "ಆರೋಗ್ಯ ಮಿತ್ರ",
+                headerSubtitle: "ನಿಮ್ಮ AI-ಚಾಲಿತ ಆರೋಗ್ಯ ಶಿಕ್ಷಣ ಸಹಾಯಕ",
+                inputPlaceholder: "ರೋಗಲಕ್ಷಣಗಳು, ಲಸಿಕೆ ಅಥವಾ ಆರೋಗ್ಯ ಸಲಹೆಗಳ ಬಗ್ಗೆ ಕೇಳಿ...",
+                welcomeMessage: "ನಮಸ್ಕಾರ! ನಾನು ನಿಮ್ಮ ಆರೋಗ್ಯ ಮಿತ್ರ. ನಾನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ:\n• ರೋಗದ ಲಕ್ಷಣಗಳು ಮತ್ತು ತಡೆಗಟ್ಟುವಿಕೆ\n• ಲಸಿಕೆ ವೇಳಾಪಟ್ಟಿ\n• ಸಾಮಾನ್ಯ ಆರೋಗ್ಯ ಸಲಹೆ\n• ಪ್ರಾಥಮಿಕ ಚಿಕಿತ್ಸಾ ಮಾಹಿತಿ\n\nಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?",
+                quickButtons: [
+                    "ಶೀತದ ಲಕ್ಷಣಗಳು",
+                    "ಮಕ್ಕಳ ಲಸಿಕೆ",
+                    "ಮಧುಮೇಹ ತಡೆಗಟ್ಟುವಿಕೆ",
+                    "ರಕ್ತದೊತ್ತಡ",
+                    "ಪ್ರಾಥಮಿಕ ಚಿಕಿತ್ಸೆ"
+                ],
+                typingText: "AI ಯೋಚಿಸುತ್ತಿದೆ...",
+                emergencyText: "🚨 ವೈದ್ಯಕೀಯ ತುರ್ತುಸ್ಥಿತಿಗೆ ತಕ್ಷಣ 108ಗೆ ಕರೆ ಮಾಡಿ"
+            },
+            ml: {
+                headerTitle: "ആരോഗ്യ മിത്രം",
+                headerSubtitle: "നിങ്ങളുടെ AI-പ്രവർത്തിത ആരോഗ്യ വിദ്യാഭ്യാസ സഹായി",
+                inputPlaceholder: "രോഗലക്ഷണങ്ങൾ, വാക്സിനേഷൻ അല്ലെങ്കിൽ ആരോഗ്യ നുറുങ്ങുകൾ എന്നിവയെക്കുറിച്ച് ചോദിക്കുക...",
+                welcomeMessage: "നമസ്കാരം! ഞാൻ നിങ്ങളുടെ ആരോഗ്യ മിത്രമാണ്. എനിക്ക് നിങ്ങളെ സഹായിക്കാൻ കഴിയും:\n• രോഗലക്ഷണങ്ങളും പ്രതിരോധവും\n• വാക്സിനേഷൻ ഷെഡ്യൂൾ\n• പൊതു ആരോഗ്യ ഉപദേശം\n• പ്രാഥമിക ചികിത്സാ വിവരങ്ങൾ\n\nഇന്ന് ഞാൻ നിങ്ങളെ എങ്ങനെ സഹായിക്കാം?",
+                quickButtons: [
+                    "ജലദോഷ ലക്ഷണങ്ങൾ",
+                    "കുട്ടികളുടെ വാക്സിനേഷൻ",
+                    "പ്രമേഹ പ്രതിരോധം",
+                    "രക്തസമ്മർദ്ദം",
+                    "പ്രാഥമിക ചികിത്സ"
+                ],
+                typingText: "AI ചിന്തിക്കുന്നു...",
+                emergencyText: "🚨 മെഡിക്കൽ എമർജൻസികൾക്ക് ഉടൻ 108-ൽ വിളിക്കുക"
+            },
+            pa: {
+                headerTitle: "ਸਿਹਤ ਮਿੱਤਰ",
+                headerSubtitle: "ਤੁਹਾਡਾ AI-ਚਾਲਿਤ ਸਿਹਤ ਸਿਖਿਆ ਸਹਾਇਕ",
+                inputPlaceholder: "ਲੱਛਣ, ਟੀਕਾਕਰਨ, ਜਾਂ ਸਿਹਤ ਟਿਪਸ ਬਾਰੇ ਪੁੱਛੋ...",
+                welcomeMessage: "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਤੁਹਾਡਾ ਸਿਹਤ ਮਿੱਤਰ ਹਾਂ। ਮੈਂ ਤੁਹਾਡੀ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ:\n• ਬਿਮਾਰੀ ਦੇ ਲੱਛਣ ਅਤੇ ਰੋਕਥਾਮ\n• ਟੀਕਾਕਰਨ ਸਮਾ-ਸੂਚੀ\n• ਆਮ ਸਿਹਤ ਸਲਾਹ\n• ਪਹਿਲੀ ਮਦਦ ਦੀ ਜਾਣਕਾਰੀ\n\nਅੱਜ ਮੈਂ ਤੁਹਾਡੀ ਕਿਵੇਂ ਸਹਾਇਤਾ ਕਰ ਸਕਦਾ ਹਾਂ?",
+                quickButtons: [
+                    "ਜ਼ੁਕਾਮ ਦੇ ਲੱਛਣ",
+                    "ਬੱਚਿਆਂ ਦਾ ਟੀਕਾਕਰਨ",
+                    "ਸ਼ੂਗਰ ਦੀ ਰੋਕਥਾਮ",
+                    "ਖੂਨ ਦਾ ਦਬਾਅ",
+                    "ਪਹਿਲੀ ਮਦਦ"
+                ],
+                typingText: "AI ਸੋਚ ਰਿਹਾ ਹੈ...",
+                emergencyText: "🚨 ਡਾਕਟਰੀ ਐਮਰਜੈਂਸੀ ਲਈ ਤੁਰੰਤ 108 ਤੇ ਕਾਲ ਕਰੋ"
+            },
+            or: {
+                headerTitle: "ସ୍ୱାସ୍ଥ୍ୟ ମିତ୍ର",
+                headerSubtitle: "ଆପଣଙ୍କର AI-ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ଶିକ୍ଷା ସହାୟକ",
+                inputPlaceholder: "ଲକ୍ଷଣ, ଟୀକାକରଣ କିମ୍ବା ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶ ବିଷୟରେ ପଚାରନ୍ତୁ...",
+                welcomeMessage: "ନମସ୍କାର! ମୁଁ ଆପଣଙ୍କର ସ୍ୱାସ୍ଥ୍ୟ ମିତ୍ର। ମୁଁ ଆପଣଙ୍କୁ ସାହାଯ୍ୟ କରିପାରିବି:\n• ରୋଗର ଲକ୍ଷଣ ଏବଂ ପ୍ରତିରୋଧ\n• ଟୀକାକରଣ କାର୍ଯ୍ୟସୂଚୀ\n• ସାଧାରଣ ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶ\n• ପ୍ରାଥମିକ ଚିକିତ୍ସା ସୂଚନା\n\nଆଜି ମୁଁ ଆପଣଙ୍କୁ କିପରି ସାହାଯ୍ୟ କରିପାରିବି?",
+                quickButtons: [
+                    "ଜ୍ୱର ଶୀତର ଲକ୍ଷଣ",
+                    "ଶିଶୁ ଟୀକାକରଣ",
+                    "ମଧୁମେହ ପ୍ରତିରୋଧ",
+                    "ରକ୍ତଚାପ",
+                    "ପ୍ରାଥମିକ ଚିକିତ୍ସା"
+                ],
+                typingText: "AI ଚିନ୍ତା କରୁଛି...",
+                emergencyText: "🚨 ଚିକିତ୍ସା ଜରୁରୀ ଅବସ୍ଥାରେ ତୁରନ୍ତ 108 କୁ କଲ କରନ୍ତୁ"
+            },
+            as: {
+                headerTitle: "স্বাস্থ্য বন্ধু",
+                headerSubtitle: "আপোনাৰ AI-চালিত স্বাস্থ্য শিক্ষা সহায়ক",
+                inputPlaceholder: "লক্ষণ, টিকাদান বা স্বাস্থ্য পৰামৰ্শৰ বিষয়ে সুধিব...",
+                welcomeMessage: "নমস্কাৰ! মই আপোনাৰ স্বাস্থ্য বন্ধু। মই আপোনাক সহায় কৰিব পাৰোঁ:\n• ৰোগৰ লক্ষণ আৰু প্ৰতিৰোধ\n• টিকাদানৰ সময়সূচী\n• সাধাৰণ স্বাস্থ্য পৰামৰ্শ\n• প্ৰাথমিক চিকিৎসাৰ তথ্য\n\nআজি মই আপোনাক কেনেদৰে সহায় কৰিব পাৰোঁ?",
+                quickButtons: [
+                    "চৰ্দিৰ লক্ষণ",
+                    "শিশুৰ টিকাদান",
+                    "ডায়েবেটিছ প্ৰতিৰোধ",
+                    "তেজৰ চাপ",
+                    "প্ৰাথমিক চিকিৎসা"
+                ],
+                typingText: "AI চিন্তা কৰি আছে...",
+                emergencyText: "🚨 চিকিৎসাজনিত জৰুৰীকালীন অৱস্থাত তৎক্ষণাৎ 108 নম্বৰত ফোন কৰক"
+            }
+        };
+
+        const healthDatabase = {
+            symptoms: {
+                "cold": {
+                    en: "Common cold symptoms include runny nose, sneezing, cough, and mild fever. Rest, stay hydrated, and consult a doctor if symptoms persist.",
+                    hi: "सामान्य सर्दी के लक्षणों में बहती नाक, छींक, खांसी और हल्का बुखार शामिल है। आराम करें, पानी पिएं, और यदि लक्षण बने रहें तो डॉक्टर से सलाह लें।",
+                    bn: "সাধারণ সর্দির উপসর্গের মধ্যে রয়েছে নাক দিয়ে পানি পড়া, হাঁচি, কাশি এবং হালকা জ্বর। বিশ্রাম নিন, পানি পান করুন এবং উপসর্গ বজায় থাকলে ডাক্তারের পরামর্শ নিন।",
+                    ta: "சாதாரண சளியின் அறிகுறிகளில் மூக்கு ஒழுகுதல், தும்மல், இருமல் மற்றும் லேசான காய்ச்சல் ஆகியவை அடங்கும். ஓய்வு எடுக்கவும், நீர் அருந்தவும், அறிகுறிகள் நீடித்தால் மருத்துவரை அணுகவும்।",
+                    te: "సాధారణ జలుబు లక్షణాలలో ముక్కు కారడం, తుమ్మలు, దగ్గు మరియు తేలికపాటి జ్వరం ఉంటాయి. విశ్రాంతి తీసుకోండి, నీరు త్రాగండి మరియు లక్షణాలు కొనసాగితే వైద్యుడిని సంప్రదించండి।",
+                    mr: "सामान्य सर्दीच्या लक्षणांमध्ये नाकातून पाणी येणे, शिंकणे, खोकला आणि हलका ताप यांचा समावेश आहे. आराम करा, पाणी प्या आणि लक्षणे कायम राहिल्यास डॉक्टरांचा सल्ला घ्या।",
+                    gu: "સામાન્ય શરદીના લક્ષણોમાં નાકમાંથી પાણી વહેવું, છીંક, ખાંસી અને હળવો તાવ શામેલ છે. આરામ કરો, પાણી પીવો અને જો લક્ષણો ચાલુ રહે તો ડૉક્ટરની સલાહ લો।",
+                    kn: "ಸಾಮಾನ್ಯ ಶೀತದ ಲಕ್ಷಣಗಳು ಮೂಗಿನಿಂದ ನೀರು ಬರುವುದು, ಸೀನುವುದು, ಕೆಮ್ಮು ಮತ್ತು ಸಣ್ಣ ಜ್ವರ. ವಿಶ್ರಾಂತಿ ತೆಗೆದುಕೊಳ್ಳಿ, ನೀರು ಕುಡಿಯಿರಿ ಮತ್ತು ಲಕ್ಷಣಗಳು ಮುಂದುವರಿದರೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ।",
+                    ml: "സാധാരണ ജലദോഷത്തിന്റെ ലക്ഷണങ്ങളിൽ മൂക്കൊലിപ്പ്, തുമ്മൽ, ചുമ, നേരിയ പനി എന്നിവ ഉൾപ്പെടുന്നു. വിശ്രമിക്കുക, വെള്ളം കുടിക്കുക, ലക്ഷണങ്ങൾ നിലനിൽക്കുകയാണെങ്കിൽ ഡോക്ടറെ സമീപിക്കുക।",
+                    pa: "ਆਮ ਜ਼ੁਕਾਮ ਦੇ ਲੱਛਣਾਂ ਵਿੱਚ ਨੱਕ ਵਗਣਾ, ਛਿੰਕ, ਖੰਘ ਅਤੇ ਹਲਕਾ ਬੁਖਾਰ ਸ਼ਾਮਲ ਹੈ। ਆਰਾਮ ਕਰੋ, ਪਾਣੀ ਪੀਓ, ਅਤੇ ਜੇ ਲੱਛਣ ਬਣੇ ਰਹਿਣ ਤਾਂ ਡਾਕਟਰ ਦੀ ਸਲਾਹ ਲਓ।",
+                    or: "ସାଧାରଣ ଶୀତର ଲକ୍ଷଣରେ ନାକ ବହିବା, ଛିଙ୍କ, କାଶ ଏବଂ ହାଲୁକା ଜ୍ୱର ଅନ୍ତର୍ଭୁକ୍ତ। ବିଶ୍ରାମ ନିଅନ୍ତୁ, ପାଣି ପିଅନ୍ତୁ ଏବଂ ଲକ୍ଷଣ ରହିଲେ ଡାକ୍ତରଙ୍କ ପରାମର୍ଶ ନିଅନ୍ତୁ।",
+                    as: "সাধাৰণ চৰ্দিৰ লক্ষণসমূহৰ ভিতৰত নাকেৰে পানী ওলোৱা, হাঁচি, কাহ আৰু সামান্য জ্বৰ আছে। বিশ্ৰাম লওক, পানী খাওক আৰু লক্ষণসমূহ অব্যাহত থাকিলে চিকিৎসকৰ পৰামৰ্শ লওক।"
+                },
+                "fever": {
+                    en: "Fever is body temperature above 100.4°F (38°C). Common causes include infections. Seek medical attention if fever exceeds 103°F or lasts more than 3 days.",
+                    hi: "बुखार का मतलब शरीर का तापमान 100.4°F (38°C) से ऊपर होना है। सामान्य कारणों में संक्रमण शामिल है। यदि बुखार 103°F से अधिक हो या 3 दिन से अधिक रहे तो चिकित्सा सहायता लें।",
+                    bn: "জ্বর হল শরীরের তাপমাত্রা ১০০.৪°F (৩৮°C) এর উপরে। সাধারণ কারণগুলির মধ্যে সংক্রমণ রয়েছে। জ্বর ১০৩°F এর বেশি হলে বা ৩ দিনের বেশি স্থায়ী হলে চিকিৎসা সহায়তা নিন।",
+                    ta: "காய்ச்சல் என்பது உடல் வெப்பநிலை 100.4°F (38°C) க்கு மேல் இருப்பது. பொதுவான காரணங்களில் தொற்றுகள் அடங்கும். காய்ச்சல் 103°F ஐ மீறினால் அல்லது 3 நாட்களுக்கு மேல் நீடித்தால் மருத்துவ உதவியை நாடுங்கள்।",
+                    te: "జ్వరం అంటే శరీర ఉష్ణోగ్రత 100.4°F (38°C) కంటే ఎక్కువ. సాధారణ కారణాలలో ఇన్‌ఫెక్షన్లు ఉన్నాయి. జ్వరం 103°F మించితే లేదా 3 రోజులకు మించి ఉంటే వైద్య సహায్యం తీసుకోండి।",
+                    mr: "ताप म्हणजे शरीराचे तापमान 100.4°F (38°C) पेक्षा जास्त असणे. सामान्य कारणांमध्ये संक्रमणाचा समावेश आहे. ताप 103°F पेक्षा जास्त झाल्यास किंवा 3 दिवसांपेक्षा जास्त काळ राहिल्यास वैद्यकीय मदत घ्या।",
+                    gu: "તાવ એટલે શરીરનું તાપમાન 100.4°F (38°C) થી વધુ હોવું. સામાન્ય કારણોમાં ચેપ શામેલ છે. જો તાવ 103°F થી વધુ હોય અથવા 3 દિવસથી વધુ ટકે તો તબીબી સહાય લો।",
+                    kn: "ಜ್ವರ ಎಂದರೆ ದೇಹದ ಉಷ್ಣಾಂಶ 100.4°F (38°C) ಕ್ಕಿಂತ ಹೆಚ್ಚಾಗಿರುವುದು. ಸಾಮಾನ್ಯ ಕಾರಣಗಳಲ್ಲಿ ಸೋಂಕುಗಳು ಸೇರಿವೆ. ಜ್ವರ 103°F ಮೀರಿದರೆ ಅಥವಾ 3 ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ಕಾಲ ಇದ್ದರೆ ವೈದ್ಯಕೀಯ ಸಹಾಯವನ್ನು ಪಡೆಯಿರಿ।",
+                    ml: "പനി എന്നാൽ ശരീര താപനില 100.4°F (38°C) ന് മുകളിൽ ആകുന്നതാണ്. സാധാരണ കാരണങ്ങളിൽ അണുബാധകൾ ഉൾപ്പെടുന്നു. പനി 103°F കവിയുകയോ 3 ദിവസത്തിൽ കൂടുതൽ നിലനിൽക്കുകയോ ചെയ്താൽ വൈദ്യസഹായം തേടുക।",
+                    pa: "ਬੁਖਾਰ ਦਾ ਮਤਲਬ ਸਰੀਰ ਦਾ ਤਾਪਮਾਨ 100.4°F (38°C) ਤੋਂ ਉੱਪਰ ਹੋਣਾ ਹੈ। ਆਮ ਕਾਰਨਾਂ ਵਿੱਚ ਇਨਫੈਕਸ਼ਨ ਸ਼ਾਮਲ ਹਨ। ਜੇ ਬੁਖਾਰ 103°F ਤੋਂ ਵੱਧ ਹੋਵੇ ਜਾਂ 3 ਦਿਨਾਂ ਤੋਂ ਜ਼ਿਆਦਾ ਰਹੇ ਤਾਂ ਡਾਕਟਰੀ ਮਦਦ ਲਓ।",
+                    or: "ଜ୍ୱର ମାନେ ଶରୀରର ତାପମାତ୍ରା 100.4°F (38°C) ଉପରେ। ସାଧାରଣ କାରଣଗୁଡ଼ିକରେ ସଂକ୍ରମଣ ଅନ୍ତର୍ଭୁକ୍ତ। ଯଦି ଜ୍ୱର 103°F ଅତିକ୍ରମ କରେ କିମ୍ବା 3 ଦିନରୁ ଅଧିକ ରହେ ତେବେ ଚିକିତ୍ସା ସହାୟତା ନିଅନ୍ତୁ।",
+                    as: "জ্বৰ মানে শৰীৰৰ উষ্ণতা 100.4°F (38°C) ৰ ওপৰত। সাধাৰণ কাৰণসমূহত সংক্ৰমণ অন্তৰ্ভুক্ত। যদি জ্বৰ 103°F অতিক্ৰম কৰে বা 3 দিনতকৈ বেছি থাকে তেন্তে চিকিৎসা সহায় লওক।"
+                }
+            }
+        };
+
+        function initializeChatbot() {
+            updateLanguage();
+            addBotMessage(getCurrentContent().welcomeMessage);
+            // updateQuickButtons(); // Removed quick buttons
+            updateNotificationBadge(); // Initialize notification system
+            
+            setTimeout(() => {
+                isConnected = true;
+                document.getElementById('connectionStatus').classList.remove('offline');
+            }, 2000);
+        }
+
+        function changeLanguage() {
+            const selector = document.getElementById('languageSelector');
+            currentLanguage = selector.value;
+            updateLanguage();
+            // updateQuickButtons(); // Removed quick buttons
+        }
+
+        function updateLanguage() {
+            const currentContent = getCurrentContent();
+            document.getElementById('headerTitle').textContent = currentContent.headerTitle;
+            document.getElementById('headerSubtitle').textContent = currentContent.headerSubtitle;
+            document.getElementById('chatInput').placeholder = currentContent.inputPlaceholder;
+            document.getElementById('emergencyBanner').innerHTML = currentContent.emergencyText;
+            
+            // Update notification UI
+            const notificationTitle = document.getElementById('notificationTitle');
+            const markAllReadBtn = document.getElementById('markAllReadBtn');
+            if (notificationTitle) notificationTitle.textContent = currentContent.notificationTitle;
+            if (markAllReadBtn) markAllReadBtn.textContent = currentContent.markAllRead;
+        }
+
+        function getCurrentContent() {
+            return content[currentLanguage] || content.en;
+        }
+
+        function updateQuickButtons() {
+            // Quick buttons functionality removed
+            /*
+            const quickButtonsContainer = document.getElementById('quickButtons');
+            const currentContent = getCurrentContent();
+            
+            quickButtonsContainer.innerHTML = '';
+            currentContent.quickButtons.forEach(buttonText => {
+                const button = document.createElement('button');
+                button.className = 'quick-btn';
+                button.textContent = buttonText;
+                button.onclick = () => sendQuickMessage(buttonText);
+                quickButtonsContainer.appendChild(button);
+            });
+            */
+        }
+
+        function addMessage(message, isUser = false, formattedContent = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = isUser ? '👤' : '🏥';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            if (!isUser && formattedContent && formattedContent.sections) {
+                // Render structured content
+                content.innerHTML = renderFormattedContent(formattedContent);
+            } else if (!isUser && (message.includes('•') || message.includes('- '))) {
+                // Format bullet points properly
+                let formattedMessage = message
+                    .replace(/\n/g, '<br>')
+                    .replace(/•\s*/g, '<li style="list-style-type: disc; margin-left: 20px;">')
+                    .replace(/- /g, '<li style="list-style-type: disc; margin-left: 20px;">')
+                    .replace(/<li[^>]*>/g, '<li style="list-style-type: disc; margin-left: 20px; margin-bottom: 5px;">');
+                
+                // Wrap bullet points in proper list structure
+                if (formattedMessage.includes('<li')) {
+                    formattedMessage = formattedMessage
+                        .replace(/(<li[^>]*>[^<]*)<br>/g, '$1</li>')
+                        .replace(/(<li[^>]*>[^<]*$)/g, '$1</li>');
+                    
+                    // Wrap consecutive list items in ul tags
+                    formattedMessage = formattedMessage.replace(
+                        /(<li[^>]*>.*?<\/li>(?:\s*<li[^>]*>.*?<\/li>)*)/gs, 
+                        '<ul style="margin: 0; padding-left: 20px;">$1</ul>'
+                    );
+                }
+                
+                content.innerHTML = formattedMessage;
+            } else {
+                content.textContent = message;
+            }
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function renderFormattedContent(formattedContent) {
+            let html = '';
+            
+            formattedContent.sections.forEach(section => {
+                if (section.title) {
+                    html += `<div class="section-title">${section.title}</div>`;
+                }
+                
+                if (section.type === 'list' && section.items) {
+                    html += '<ul class="formatted-list">';
+                    section.items.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += '</ul>';
+                } else if (section.type === 'warning') {
+                    html += `<div class="warning-section">${section.content}</div>`;
+                } else if (section.type === 'table') {
+                    html += `<div class="table-section">${section.content}</div>`;
+                } else {
+                    html += `<div class="text-section">${section.content}</div>`;
+                }
+            });
+            
+            return html;
+        }
+
+        function addBotMessage(message, formattedContent = null) {
+            addMessage(message, false, formattedContent);
+        }
+
+        function addUserMessage(message) {
+            addMessage(message, true);
+        }
+
+        function showTyping() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.style.display = 'flex';
+            typingIndicator.querySelector('.typing-dots').textContent = getCurrentContent().typingText;
+        }
+
+        function hideTyping() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        async function getAIResponse(userMessage) {
+            try {
+                 const response = await fetch('http://localhost:5000/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        language: currentLanguage,
+                        user_id: 'web-user-' + Date.now()
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                return {
+                    message: data.response,
+                    formatted_content: data.formatted_content
+                };
+            } catch (error) {
+                console.error('Error connecting to backend:', error);
+                throw error; 
+            }
+        }
+
+        function simulateAIResponse(userMessage) {
+            showTyping();
+            
+            getAIResponse(userMessage)
+                .then(response => {
+                    hideTyping();
+                    addBotMessage(response.message, response.formatted_content);
+                    isConnected = true;
+                    document.getElementById('connectionStatus').classList.remove('offline');
+                })
+                .catch(() => {
+                    hideTyping();
+                    const response = generateResponse(userMessage.toLowerCase());
+                    addBotMessage(response + "\n\n⚠️ Using offline mode - some features may be limited");
+                    isConnected = false;
+                    document.getElementById('connectionStatus').classList.add('offline');
+                });
+        }
+
+        function generateResponse(message) {
+            if (message.includes('cold') || message.includes('सर्दी') || message.includes('সর্দি') || message.includes('சளி') || 
+                message.includes('జలుబు') || message.includes('सर्दी') || message.includes('શરદી') || message.includes('ಶೀತ') ||
+                message.includes('ജലദോഷം') || message.includes('ਜ਼ੁਕਾਮ') || message.includes('ଶୀତ') || message.includes('চৰ্দি')) {
+                return healthDatabase.symptoms.cold[currentLanguage] || healthDatabase.symptoms.cold.en;
+            }
+            
+            if (message.includes('fever') || message.includes('बुखार') || message.includes('জ্বর') || message.includes('காய்ச்சல்') ||
+                message.includes('జ్వరం') || message.includes('ताप') || message.includes('તાવ') || message.includes('ಜ್ವರ') ||
+                message.includes('പനി') || message.includes('ਬੁਖਾਰ') || message.includes('ଜ୍ୱର') || message.includes('জ্বৰ')) {
+                return healthDatabase.symptoms.fever[currentLanguage] || healthDatabase.symptoms.fever.en;
+            }
+            
+            const fallbackResponses = {
+                en: "I'd be happy to help you! Please ask more specific questions about symptoms, vaccination schedules, or prevention tips. You can also use the quick buttons above.",
+                hi: "मुझे खुशी होगी आपकी मदद करना में! कृपया लक्षणों, टीकाकरण या रोकथाम के सुझावों के बारे में और अधिक विशिष्ट प्रश्न पूछें। आप ऊपर दिए गए त्वरित बटनों का भी उपयोग कर सकते हैं।",
+                bn: "আমি আপনাকে সাহায্য করতে পেরে খুশি হব! দয়া করে উপসর্গ, টিকাদানের সময়সূচী, বা প্রতিরোধের টিপস সম্পর্কে আরও নির্দিষ্ট প্রশ্ন জিজ্ঞাসা করুন। আপনি উপরের দ্রুত বোতামগুলিও ব্যবহার করতে পারেন।",
+                ta: "உங்களுக்கு உதவ நான் மகிழ்ச்சியடைகிறேன்! அறிகுறிகள், தடுப்பூசி அட்டவணைகள் அல்லது தடுப்பு குறிப்புகள் பற்றி மேலும் குறிப்பிட்ட கேள்விகளைக் கேளுங்கள். மேலே உள்ள விரைவு பொத்தான்களையும் நீங்கள் பயன்படுத்தலாம்.",
+                te: "నేను మీకు సహాయం చేయడానికి సంతోషిస్తాను! దయచేసి లక్షణాలు, టీకా కార్యక్రమాలు లేదా నివారణ చిట్కాల గురించి మరింత నిర్దిష్ట ప్రశ్నలు అడగండి. మీరు పైన ఉన్న త్వరిత బటన్లను కూడా ఉపయోగించవచ్చు.",
+                mr: "मी तुम्हाला मदत करण्यास आनंदी आहे! कृपया लक्षणे, लसीकरण वेळापत्रक किंवा प्रतिबंधात्मक टिप्सबद्दल अधिक विशिष्ट प्रश्न विचारा. तुम्ही वरील जलद बटणे देखील वापरू शकता.",
+                gu: "હું તમને મદદ કરવા માટે ખુશ છું! કૃપા કરીને લક્ષણો, રસીકરણ કાર્યક્રમો અથવા નિવારણ ટિપ્સ વિશે વધુ ચોક્કસ પ્રશ્નો પૂછો. તમે ઉપરના ઝડપી બટનોનો પણ ઉપયોગ કરી શકો છો.",
+                kn: "ನಿಮಗೆ ಸಹಾಯ ಮಾಡಲು ನಾನು ಸಂತೋಷಪಡುತ್ತೇನೆ! ದಯವಿಟ್ಟು ರೋಗಲಕ್ಷಣಗಳು, ಲಸಿಕೆ ವೇಳಾಪಟ್ಟಿಗಳು ಅಥವಾ ತಡೆಗಟ್ಟುವಿಕೆ ಸಲಹೆಗಳ ಬಗ್ಗೆ ಹೆಚ್ಚು ನಿರ್ದಿಷ್ಟ ಪ್ರಶ್ನೆಗಳನ್ನು ಕೇಳಿ. ನೀವು ಮೇಲಿನ ತ್ವರಿತ ಬಟನ್‌ಗಳನ್ನು ಸಹ ಬಳಸಬಹುದು.",
+                ml: "നിങ്ങളെ സഹായിക്കാൻ ഞാൻ സന്തോഷിക്കുന്നു! ദയവായി രോഗലക്ഷണങ്ങൾ, വാക്സിനേഷൻ ഷെഡ്യൂളുകൾ, അല്ലെങ്കിൽ പ്രതിരോധ നുറുങ്ങുകൾ എന്നിവയെക്കുറിച്ച് കൂടുതൽ നിർദ്ദിഷ്ട ചോദ്യങ്ങൾ ചോദിക്കുക. നിങ്ങൾക്ക് മുകളിലുള്ള ദ്രുത ബട്ടണുകളും ഉപയോഗിക്കാം.",
+                pa: "ਮੈਂ ਤੁਹਾਡੀ ਮਦਦ ਕਰਕੇ ਖੁਸ਼ ਹੋਵਾਂਗਾ! ਕਿਰਪਾ ਕਰਕੇ ਲੱਛਣਾਂ, ਟੀਕਾਕਰਨ ਸਮਾ-ਸੂਚੀ, ਜਾਂ ਰੋਕਥਾਮ ਟਿਪਸ ਬਾਰੇ ਹੋਰ ਖਾਸ ਸਵਾਲ ਪੁੱਛੋ। ਤੁਸੀਂ ਉੱਪਰ ਦਿੱਤੇ ਤੇਜ਼ ਬਟਨਾਂ ਦੀ ਵੀ ਵਰਤੋਂ ਕਰ ਸਕਦੇ ਹੋ।",
+                or: "ମୁଁ ଆପଣଙ୍କୁ ସାହାଯ୍ୟ କରିବାକୁ ଖୁସି ହେବି! ଦୟାକରି ଲକ୍ଷଣ, ଟୀକାକରଣ କାର୍ଯ୍ୟସୂଚୀ, କିମ୍ବା ପ୍ରତିରୋଧ ପରାମର୍ଶ ବିଷୟରେ ଅଧିକ ନିର୍ଦ୍ଦିଷ୍ଟ ପ୍ରଶ୍ନ ପଚାରନ୍ତୁ। ଆପଣ ଉପରୋକ୍ତ ତୁରନ୍ତ ବଟନ୍ ମଧ୍ୟ ବ୍ୟବହାର କରିପାରିବେ।",
+                as: "মই আপোনাক সহায় কৰিবলৈ সুখী হ'ম! অনুগ্ৰহ কৰি লক্ষণ, টিকাকৰণৰ সময়সূচী, বা প্ৰতিৰোধৰ টিপছৰ বিষয়ে অধিক সুনির্দিষ্ট প্ৰশ্ন সুধক। আপুনি ওপৰৰ দ্ৰুত বুটামবোৰো ব্যৱহাৰ কৰিব পাৰে।"
+            };
+            return fallbackResponses[currentLanguage] || fallbackResponses.en;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (message === '') return;
+
+            addUserMessage(message);
+            simulateAIResponse(message);
+            input.value = '';
+        }
+
+        function sendQuickMessage(message) {
+            addUserMessage(message);
+            simulateAIResponse(message);
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeChatbot);
+
+        document.getElementById('sendButton').addEventListener('click', sendMessage);
+
+        document.getElementById('chatInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+   
+        setTimeout(monitorNetworkStatus, 10000); 
+    </script>
+</body>
+</html>

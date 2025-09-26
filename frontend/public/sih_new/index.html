@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>স্বাস্থ্য মিত্র - Health Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('healthcare-background.jpg') center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 80px 20px 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .nav-logo:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Notification Bell Styles */
+        .notification-container {
+            position: relative;
+            margin-left: 15px;
+        }
+
+        .notification-bell {
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .notification-bell:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #ff4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            min-width: 320px;
+            max-width: 400px;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .notification-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .notification-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notification-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .notification-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item.unread {
+            background-color: #eff6ff;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .notification-content {
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 6px;
+        }
+
+        .notification-time {
+            color: #9ca3af;
+            font-size: 11px;
+        }
+
+        .notification-footer {
+            padding: 12px 20px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .view-all-btn {
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .view-all-btn:hover {
+            text-decoration: underline;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background: transparent;
+            border-radius: 20px;
+            box-shadow: none;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: none;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #a2c1f3 0%, #1e40af 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .language-selector {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .language-dropdown {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .language-dropdown:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .language-dropdown option {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: transparent;
+            position: relative;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-bottom-right-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .message.bot .message-content {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom-left-radius: 5px;
+            box-shadow: none;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin: 0 10px;
+            flex-shrink: 0;
+        }
+
+        .message.user .avatar {
+            background: transparent;
+            color: white;
+            order: 2;
+            border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+
+        .message.bot .avatar {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .quick-options {
+            padding: 10px 20px;
+            background: transparent;
+            border-top: none;
+        }
+
+        .health-quick-dropdown {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .dropdown-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #3b82f6;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .health-dropdown {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .health-dropdown:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+
+        .health-dropdown:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 10px;
+            background: transparent;
+            border-radius: 30px;
+            box-shadow: none;
+            margin: 10px 0;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: transparent;
+            min-height: 20px;
+            color: white;
+        }
+
+        .chat-input:focus {
+            border-color: rgba(76, 175, 80, 0.5);
+            box-shadow: none;
+        }
+
+        .chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .send-btn {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+            margin-left: 5px;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            opacity: 0.8;
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .mic-btn {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(99, 102, 241, 0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            box-shadow: none;
+            z-index: 1000;
+            position: relative;
+        }
+
+        .mic-btn:hover {
+            transform: scale(1.05);
+            opacity: 0.8;
+        }
+
+        .mic-btn.recording {
+            background: rgba(239, 68, 68, 0.2);
+            color: white;
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            animation: pulse-recording 1s infinite;
+        }
+
+        @keyframes pulse-recording {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .mic-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            animation: none;
+        }
+
+        .speech-status {
+            position: absolute;
+            bottom: 70px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            text-align: center;
+            display: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            font-style: italic;
+            color: white;
+        }
+
+        .typing-dots {
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 60%, 100% { opacity: 1; }
+            30% { opacity: 0.3; }
+        }
+
+        .emergency-banner {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .header-title {
+                font-size: 20px;
+            }
+            
+            .language-selector {
+                position: static;
+                transform: none;
+                margin-top: 10px;
+            }
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        .connection-status.offline {
+            background: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="nav-header">
+        <a href="#" class="nav-logo" onclick="goHome()">
+            🏥 RuralHealth Assistant
+        </a>
+        <div class="nav-links">
+            <a href="#" class="nav-link" onclick="goHome()">Home</a>
+            <a href="#" class="nav-link active">Chat</a>
+            <a href="#" class="nav-link" onclick="showAbout()">About</a>
+            
+            <!-- Notification Bell -->
+            <div class="notification-container">
+                <button class="notification-bell" onclick="toggleNotifications()" id="notificationBell">
+                    🔔
+                    <span class="notification-badge" id="notificationBadge">3</span>
+                </button>
+                
+                <!-- Notification Dropdown -->
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <div class="notification-header">
+                        💉 Vaccination Drives & Health Updates
+                    </div>
+                    <div class="notification-list" id="notificationList">
+                        <!-- Notifications will be inserted here -->
+                    </div>
+                    <div class="notification-footer">
+                        <a href="#" class="view-all-btn" onclick="showAllNotifications()">View All Notifications</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="chat-container">
+        <div class="emergency-banner" id="emergencyBanner">
+            🚨 For medical emergencies, call 108 immediately | আপৎকালীন অবস্থায় ১০৮ নম্বরে কল করুন
+        </div>
+        
+        <div class="chat-header">
+            <div class="connection-status" id="connectionStatus"></div>
+            <div class="header-title" id="headerTitle">স্বাস্থ্য মিত্র - Health Companion</div>
+            <div class="header-subtitle" id="headerSubtitle">Your AI-powered healthcare education assistant</div>
+            <div class="language-selector">
+                <select class="language-dropdown" id="languageSelector" onchange="changeLanguage()">
+                    <option value="en">English</option>
+                    <option value="hi">हिन्दी</option>
+                    <option value="bn">বাংলা</option>
+                    <option value="ta">தமிழ்</option>
+                    <option value="te">తెలుగు</option>
+                    <option value="mr">मराठी</option>
+                    <option value="gu">ગુજરાતી</option>
+                    <option value="kn">ಕನ್ನಡ</option>
+                    <option value="ml">മലയാളം</option>
+                    <option value="pa">ਪੰਜਾਬੀ</option>
+                    <option value="or">ଓଡିଆ</option>
+                    <option value="as">অসমীয়া</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <span class="typing-dots">AI is thinking...</span>
+        </div>
+
+        <div class="quick-options">
+            <div class="health-quick-dropdown" id="healthQuickDropdown">
+                <div class="dropdown-label">
+                    🩺 Quick Health Questions
+                </div>
+                <select class="health-dropdown" id="healthDropdown" onchange="handleHealthDropdownChange()">
+                    <option value="">Select a health topic...</option>
+                </select>
+            </div>
+            
+            <div class="chat-input-container">
+                <input 
+                    type="text" 
+                    id="chatInput" 
+                    class="chat-input" 
+                    placeholder="Ask about symptoms, vaccination, or health tips..."
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button class="mic-btn" id="micBtn" onclick="toggleSpeechRecognition()">
+                    🎤
+                </button>
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                    ➤
+                </button>
+            </div>
+            <div class="speech-status" id="speechStatus"></div>
+        </div>
+    </div>
+
+   <script>
+        // Navigation functions
+        function goHome() {
+            // Navigate to home page - adjust URL as needed
+            window.location.href = '../../../index.html'; // or your actual home page URL
+        }
+
+        function showAbout() {
+            alert('RuralHealth Assistant\n\nAn AI-powered healthcare guidance platform designed for rural communities.\n\nFeatures:\n• Multilingual support\n• Voice interaction\n• Medical symptom guidance\n• Vaccination information\n• Health tips and advice');
+        }
+
+        let currentLanguage = 'en';
+        let isConnected = false;
+        let recognition = null;
+        let isRecording = false;
+
+        // Language codes mapping for speech recognition
+        const speechLanguageCodes = {
+            'en': 'en-US',
+            'hi': 'hi-IN',
+            'bn': 'bn-IN',
+            'ta': 'ta-IN',
+            'te': 'te-IN',
+            'mr': 'mr-IN',
+            'gu': 'gu-IN',
+            'kn': 'kn-IN',
+            'ml': 'ml-IN',
+            'pa': 'pa-IN',
+            'or': 'or-IN',
+            'as': 'as-IN'
+        };
+
+        // Language detection patterns
+        const languagePatterns = {
+            'hi': /[\u0900-\u097F]/,
+            'bn': /[\u0980-\u09FF]/,
+            'ta': /[\u0B80-\u0BFF]/,
+            'te': /[\u0C00-\u0C7F]/,
+            'mr': /[\u0900-\u097F]/,
+            'gu': /[\u0A80-\u0AFF]/,
+            'kn': /[\u0C80-\u0CFF]/,
+            'ml': /[\u0D00-\u0D7F]/,
+            'pa': /[\u0A00-\u0A7F]/,
+            'or': /[\u0B00-\u0B7F]/,
+            'as': /[\u0980-\u09FF]/
+        };
+
+        const content = {
+            en: {
+                headerTitle: "RuralHealth Assistant",
+                headerSubtitle: "Your AI-powered healthcare guidance for rural communities",
+                inputPlaceholder: "Ask about symptoms, vaccination, or health tips...",
+                welcomeMessage: "Hello! I'm your Health Companion. I can help you with:\n• Disease symptoms and prevention\n• Vaccination schedules\n• General health advice\n• First aid information\n\nHow can I assist you today?",
+                healthCategories: [
+                    {
+                        title: "🫀 Heart & Circulation",
+                        icon: "🫀",
+                        buttons: ["Heart Problems", "Blood Pressure", "Chest Pain"]
+                    },
+                    {
+                        title: "🧠 Head & Brain",
+                        icon: "🧠", 
+                        buttons: ["Headaches", "Dizziness", "Memory Issues"]
+                    },
+                    {
+                        title: "🫁 Respiratory",
+                        icon: "🫁",
+                        buttons: ["Cough & Cold", "Breathing Issues", "Asthma"]
+                    },
+                    {
+                        title: "🦴 Bones & Joints", 
+                        icon: "🦴",
+                        buttons: ["Joint Pain", "Back Pain", "Muscle Aches"]
+                    },
+                    {
+                        title: "🤰 Women's Health",
+                        icon: "🤰",
+                        buttons: ["Pregnancy Care", "Menstrual Issues", "Family Planning"]
+                    },
+                    {
+                        title: "👶 Child Health",
+                        icon: "👶", 
+                        buttons: ["Child Vaccination", "Growth Issues", "Fever in Kids"]
+                    }
+                ],
+                typingText: "AI is thinking...",
+                emergencyText: "🚨 For medical emergencies, call 108 immediately"
+            },
+            hi: {
+                headerTitle: "स्वास्थ्य मित्र",
+                headerSubtitle: "आपका AI-संचालित स्वास्थ्य शिक्षा सहायक",
+                inputPlaceholder: "लक्षण, टीकाकरण, या स्वास्थ्य सुझावों के बारे में पूछें...",
+                welcomeMessage: "नमस्ते! मैं आपका स्वास्थ्य मित्र हूँ। मैं आपकी मदद कर सकता हूँ:\n• रोग के लक्षण और बचाव\n• टीकाकरण कार्यक्रम\n• सामान्य स्वास्थ्य सलाह\n• प्राथमिक चिकित्सा जानकारी\n\nआज मैं आपकी कैसे सहायता कर सकता हूँ?",
+                healthCategories: [
+                    {
+                        title: "🫀 हृदय और रक्त संचार",
+                        icon: "🫀",
+                        buttons: ["हृदय की समस्याएं", "रक्तचाप", "सीने में दर्द"]
+                    },
+                    {
+                        title: "🧠 सिर और मस्तिष्क",
+                        icon: "🧠",
+                        buttons: ["सिरदर्द", "चक्कर आना", "स्मृति की समस्या"]
+                    },
+                    {
+                        title: "🫁 श्वसन तंत्र",
+                        icon: "🫁",
+                        buttons: ["खांसी और जुकाम", "सांस की समस्या", "दमा"]
+                    },
+                    {
+                        title: "🦴 हड्डी और जोड़",
+                        icon: "🦴",
+                        buttons: ["जोड़ों में दर्द", "कमर दर्द", "मांसपेशियों में दर्द"]
+                    },
+                    {
+                        title: "🤰 महिला स्वास्थ्य",
+                        icon: "🤰",
+                        buttons: ["गर्भावस्था देखभाल", "मासिक धर्म की समस्याएं", "परिवार नियोजन"]
+                    },
+                    {
+                        title: "👶 बाल स्वास्थ्य",
+                        icon: "👶",
+                        buttons: ["बच्चों का टीकाकरण", "विकास की समस्याएं", "बच्चों में बुखार"]
+                    }
+                ],
+                typingText: "AI सोच रहा है...",
+                emergencyText: "🚨 आपातकाल में तुरंत 108 पर कॉल करें"
+            },
+            bn: {
+                headerTitle: "স্বাস্থ্য মিত্র",
+                headerSubtitle: "আপনার AI-চালিত স্বাস্থ্যসেবা শিক্ষা সহায়ক",
+                inputPlaceholder: "উপসর্গ, টিকাদান, বা স্বাস্থ্য পরামর্শ সম্পর্কে জিজ্ঞাসা করুন...",
+                welcomeMessage: "নমস্কার! আমি আপনার স্বাস্থ্য মিত্র। আমি আপনাকে সাহায্য করতে পারি:\n• রোগের উপসর্গ ও প্রতিরোধ\n• টিকাদানের সময়সূচী\n• সাধারণ স্বাস্থ্য পরামর্শ\n• প্রাথমিক চিকিৎসার তথ্য\n\nআজ আমি কীভাবে আপনাকে সহায়তা করতে পারি?",
+                quickButtons: [
+                    "সর্দির উপসর্গ",
+                    "শিশু টিকাদান",
+                    "ডায়াবেটিস প্রতিরোধ",
+                    "রক্তচাপ",
+                    "প্রাথমিক চিকিৎসা"
+                ],
+                typingText: "AI চিন্তা করছে...",
+                emergencyText: "🚨 জরুরি অবস্থায় অবিলম্বে ১০৮ নম্বরে কল করুন"
+            },
+            ta: {
+                headerTitle: "உடல்நலம் தோழர்",
+                headerSubtitle: "உங்கள் AI-இயங்கும் சுகாதார கல்வி உதவியாளர்",
+                inputPlaceholder: "அறிகுறிகள், தடுப்பூசி அல்லது உடல்நலக் குறிப்புகளைப் பற்றிக் கேளுங்கள்...",
+                welcomeMessage: "வணக்கம்! நான் உங்கள் உடல்நலம் தோழர். நான் உங்களுக்கு உதவ முடியும்:\n• நோய் அறிகுறிகள் மற்றும் தடுப்பு\n• தடுப்பூசி அட்டவணை\n• பொதுவான உடல்நல ஆலோசனை\n• முதலுதவி தகவல்\n\nஇன்று நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?",
+                quickButtons: [
+                    "சளி அறிகுறிகள்",
+                    "குழந்தைகளுக்கான தடுப்பூசி",
+                    "நீரிழிவு தடுப்பு",
+                    "இரத்த அழுத்தம்",
+                    "முதலுதவி குறிப்புகள்"
+                ],
+                typingText: "AI யோசித்துக் கொண்டிருக்கிறது...",
+                emergencyText: "🚨 மருத்துவ அவசரநிலைக்கு உடனடியாக 108 ஐ அழையுங்கள்"
+            },
+            te: {
+                headerTitle: "ఆరోగ్య మిత్రుడు",
+                headerSubtitle: "మీ AI-ఆధారిత ఆరోగ్య విద్యా సహాయకుడు",
+                inputPlaceholder: "లక్షణాలు, టీకాలు లేదా ఆరోగ్య చిట్కాల గురించి అడగండి...",
+                welcomeMessage: "నమస్కారం! నేను మీ ఆరోగ్య మిత్రుడను. నేను మీకు సహాయం చేయగలను:\n• వ్యాధి లక్షణాలు మరియు నివారణ\n• టీకా కార్యక్రమలు\n• సాధారణ ఆరోగ్య సలహా\n• ప్రాథమిక చికిత్స సమాచారం\n\nఈరోజు నేను మీకు ఎలా సహాయం చేయగలను?",
+                healthCategories: [
+                    {
+                        title: "🫀 గుండె మరియు రక్త ప్రసరణ",
+                        icon: "🫀",
+                        buttons: ["గుండె సమస్యలు", "రక్తపోటు", "ఛాతీ నొప్పి"]
+                    },
+                    {
+                        title: "🧠 తల మరియు మెదడు",
+                        icon: "🧠",
+                        buttons: ["తలనొప్పి", "తల తిరుగుట", "జ్ఞాపకశక్తి సమస్యలు"]
+                    },
+                    {
+                        title: "🫁 శ్వాసకోశ వ్యవస్థ",
+                        icon: "🫁",
+                        buttons: ["దగ్గు మరియు జలుబు", "శ్వాస సమస్యలు", "ఆస్తమా"]
+                    },
+                    {
+                        title: "🦴 ఎముకలు మరియు కీళ్లు",
+                        icon: "🦴",
+                        buttons: ["కీళ్ల నొప్పులు", "వెనుక నొప్పి", "కండరాల నొప్పులు"]
+                    },
+                    {
+                        title: "🤰 మహిళల ఆరోగ్యం",
+                        icon: "🤰",
+                        buttons: ["గర్భధారణ సంరక్షణ", "ఋతుచక్ర సమస్యలు", "కుటుంب నియంత్రణ"]
+                    },
+                    {
+                        title: "👶 పిల్లల ఆరోగ్యం",
+                        icon: "👶",
+                        buttons: ["పిల్లల టీకాలు", "ఎదుగుదల సమస్యలు", "పిల్లలలో జ్వరం"]
+                    }
+                ],
+                typingText: "AI ఆలోచిస్తోంది...",
+                emergencyText: "🚨 వైద్య అత్యవసర పరిస్థితుల్లో వెంటనే 108కు కాల్ చేయండి"
+            },
+            mr: {
+                headerTitle: "आरोग्य मित्र",
+                headerSubtitle: "तुमचा AI-चालित आरोग्य शिक्षण सहाय्यक",
+                inputPlaceholder: "लक्षणे, लसीकरण किंवा आरोग्य सल्ल्यांबद्दल विचारा...",
+                welcomeMessage: "नमस्कार! मी तुमचा आरोग्य मित्र आहे। मी तुम्हाला मदत करू शकतो:\n• रोगाची लक्षणे आणि प्रतिबंध\n• लसीकरण वेळापत्रक\n• सामान्य आरोग्य सल्ला\n• प्राथमिक उपचार माहिती\n\nआज मी तुम्हाला कशी मदत करू शकतो?",
+                quickButtons: [
+                    "सर्दीची लक्षणे",
+                    "मुलांचे लसीकरण",
+                    "मधुमेह प्रतिबंध",
+                    "रक्तदाब",
+                    "प्राथमिक उपचार"
+                ],
+                typingText: "AI विचार करत आहे...",
+                emergencyText: "🚨 वैद्यकीय आपत्कालीन परिस्थितीत त्वरित 108 वर कॉल करा"
+            },
+            gu: {
+                headerTitle: "સ્વાસ્થ્ય મિત્ર",
+                headerSubtitle: "તમારા AI-સંચાલિત આરોગ્ય શિક્ષણ સહાયક",
+                inputPlaceholder: "લક્ષણો, રસીકરણ અથવા સ્વાસ્થ્ય સૂચનો વિશે પૂછો...",
+                welcomeMessage: "નમસ્કાર! હું તમારો સ્વાસ્થ્ય મિત્ર છું. હું તમારી મદદ કરી શકું છું:\n• રોગના લક્ષણો અને નિવારણ\n• રસીકરણ કાર્યક્રમ\n• સામાન્ય સ્વાસ્થ્ય સલાહ\n• પ્રાથમિક સારવાર માહિતી\n\nઆજે હું તમારી કેવી રીતે સહાય કરી શકું?",
+                quickButtons: [
+                    "શરદીના લક્ષણો",
+                    "બાળકોનું રસીકરણ",
+                    "ડાયાબિટીસ નિવારણ",
+                    "બ્લડ પ્રેશર",
+                    "પ્રાથમિક સારવાર"
+                ],
+                typingText: "AI વિચારી રહ્યું છે...",
+                emergencyText: "🚨 તબીબી કટોકટી માટે તુરંત 108 પર કૉલ કરો"
+            },
+            kn: {
+                headerTitle: "ಆರೋಗ್ಯ ಮಿತ್ರ",
+                headerSubtitle: "ನಿಮ್ಮ AI-ಚಾಲಿತ ಆರೋಗ್ಯ ಶಿಕ್ಷಣ ಸಹಾಯಕ",
+                inputPlaceholder: "ರೋಗಲಕ್ಷಣಗಳು, ಲಸಿಕೆ ಅಥವಾ ಆರೋಗ್ಯ ಸಲಹೆಗಳ ಬಗ್ಗೆ ಕೇಳಿ...",
+                welcomeMessage: "ನಮಸ್ಕಾರ! ನಾನು ನಿಮ್ಮ ಆರೋಗ್ಯ ಮಿತ್ರ. ನಾನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ:\n• ರೋಗದ ಲಕ್ಷಣಗಳು ಮತ್ತು ತಡೆಗಟ್ಟುವಿಕೆ\n• ಲಸಿಕೆ ವೇಳಾಪಟ್ಟಿ\n• ಸಾಮಾನ್ಯ ಆರೋಗ್ಯ ಸಲಹೆ\n• ಪ್ರಾಥಮಿಕ ಚಿಕಿತ್ಸಾ ಮಾಹಿತಿ\n\nಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?",
+                quickButtons: [
+                    "ಶೀತದ ಲಕ್ಷಣಗಳು",
+                    "ಮಕ್ಕಳ ಲಸಿಕೆ",
+                    "ಮಧುಮೇಹ ತಡೆಗಟ್ಟುವಿಕೆ",
+                    "ರಕ್ತದೊತ್ತಡ",
+                    "ಪ್ರಾಥಮಿಕ ಚಿಕಿತ್ಸೆ"
+                ],
+                typingText: "AI ಯೋಚಿಸುತ್ತಿದೆ...",
+                emergencyText: "🚨 ವೈದ್ಯಕೀಯ ತುರ್ತುಸ್ಥಿತಿಗೆ ತಕ್ಷಣ 108ಗೆ ಕರೆ ಮಾಡಿ"
+            },
+            ml: {
+                headerTitle: "ആരോഗ്യ മിത്രം",
+                headerSubtitle: "നിങ്ങളുടെ AI-പ്രവർത്തിത ആരോഗ്യ വിദ്യാഭ്യാസ സഹായി",
+                inputPlaceholder: "രോഗലക്ഷണങ്ങൾ, വാക്സിനേഷൻ അല്ലെങ്കിൽ ആരോഗ്യ നുറുങ്ങുകൾ എന്നിവയെക്കുറിച്ച് ചോദിക്കുക...",
+                welcomeMessage: "നമസ്കാരം! ഞാൻ നിങ്ങളുടെ ആരോഗ്യ മിത്രമാണ്. എനിക്ക് നിങ്ങളെ സഹായിക്കാൻ കഴിയും:\n• രോഗലക്ഷണങ്ങളും പ്രതിരോധവും\n• വാക്സിനേഷൻ ഷെഡ്യൂൾ\n• പൊതു ആരോഗ്യ ഉപദേശം\n• പ്രാഥമിക ചികിത്സാ വിവരങ്ങൾ\n\nഇന്ന് ഞാൻ നിങ്ങളെ എങ്ങനെ സഹായിക്കാം?",
+                quickButtons: [
+                    "ജലദോഷ ലക്ഷണങ്ങൾ",
+                    "കുട്ടികളുടെ വാക്സിനേഷൻ",
+                    "പ്രമേഹ പ്രതിരോധം",
+                    "രക്തസമ്മർദ്ദം",
+                    "പ്രാഥമിക ചികിത്സ"
+                ],
+                typingText: "AI ചിന്തിക്കുന്നു...",
+                emergencyText: "🚨 മെഡിക്കൽ എമർജൻസികൾക്ക് ഉടൻ 108-ൽ വിളിക്കുക"
+            },
+            pa: {
+                headerTitle: "ਸਿਹਤ ਮਿੱਤਰ",
+                headerSubtitle: "ਤੁਹਾਡਾ AI-ਚਾਲਿਤ ਸਿਹਤ ਸਿਖਿਆ ਸਹਾਇਕ",
+                inputPlaceholder: "ਲੱਛਣ, ਟੀਕਾਕਰਨ, ਜਾਂ ਸਿਹਤ ਟਿਪਸ ਬਾਰੇ ਪੁੱਛੋ...",
+                welcomeMessage: "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਤੁਹਾਡਾ ਸਿਹਤ ਮਿੱਤਰ ਹਾਂ। ਮੈਂ ਤੁਹਾਡੀ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ:\n• ਬਿਮਾਰੀ ਦੇ ਲੱਛਣ ਅਤੇ ਰੋਕਥਾਮ\n• ਟੀਕਾਕਰਨ ਸਮਾ-ਸੂਚੀ\n• ਆਮ ਸਿਹਤ ਸਲਾਹ\n• ਪਹਿਲੀ ਮਦਦ ਦੀ ਜਾਣਕਾਰੀ\n\nਅੱਜ ਮੈਂ ਤੁਹਾਡੀ ਕਿਵੇਂ ਸਹਾਇਤਾ ਕਰ ਸਕਦਾ ਹਾਂ?",
+                quickButtons: [
+                    "ਜ਼ੁਕਾਮ ਦੇ ਲੱਛਣ",
+                    "ਬੱਚਿਆਂ ਦਾ ਟੀਕਾਕਰਨ",
+                    "ਸ਼ੂਗਰ ਦੀ ਰੋਕਥਾਮ",
+                    "ਖੂਨ ਦਾ ਦਬਾਅ",
+                    "ਪਹਿਲੀ ਮਦਦ"
+                ],
+                typingText: "AI ਸੋਚ ਰਿਹਾ ਹੈ...",
+                emergencyText: "🚨 ਡਾਕਟਰੀ ਐਮਰਜੈਂਸੀ ਲਈ ਤੁਰੰਤ 108 ਤੇ ਕਾਲ ਕਰੋ"
+            },
+            or: {
+                headerTitle: "ସ୍ୱାସ୍ଥ୍ୟ ମିତ୍ର",
+                headerSubtitle: "ଆପଣଙ୍କର AI-ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ଶିକ୍ଷା ସହାୟକ",
+                inputPlaceholder: "ଲକ୍ଷଣ, ଟୀକାକରଣ କିମ୍ବା ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶ ବିଷୟରେ ପଚାରନ୍ତୁ...",
+                welcomeMessage: "ନମସ୍କାର! ମୁଁ ଆପଣଙ୍କର ସ୍ୱାସ୍ଥ୍ୟ ମିତ୍ର। ମୁଁ ଆପଣଙ୍କୁ ସାହାଯ୍ୟ କରିପାରିବି:\n• ରୋଗର ଲକ୍ଷଣ ଏବଂ ପ୍ରତିରୋଧ\n• ଟୀକାକରଣ କାର୍ଯ୍ୟସୂଚୀ\n• ସାଧାରଣ ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶ\n• ପ୍ରାଥମିକ ଚିକିତ୍ସା ସୂଚନା\n\nଆଜି ମୁଁ ଆପଣଙ୍କୁ କିପରି ସାହାଯ୍ୟ କରିପାରିବି?",
+                quickButtons: [
+                    "ଜ୍ୱର ଶୀତର ଲକ୍ଷଣ",
+                    "ଶିଶୁ ଟୀକାକରଣ",
+                    "ମଧୁମେହ ପ୍ରତିରୋଧ",
+                    "ରକ୍ତଚାପ",
+                    "ପ୍ରାଥମିକ ଚିକିତ୍ସା"
+                ],
+                typingText: "AI ଚିନ୍ତା କରୁଛି...",
+                emergencyText: "🚨 ଚିକିତ୍ସା ଜରୁରୀ ଅବସ୍ଥାରେ ତୁରନ୍ତ 108 କୁ କଲ କରନ୍ତୁ"
+            },
+            as: {
+                headerTitle: "স্বাস্থ্য বন্ধু",
+                headerSubtitle: "আপোনাৰ AI-চালিত স্বাস্থ্য শিক্ষা সহায়ক",
+                inputPlaceholder: "লক্ষণ, টিকাদান বা স্বাস্থ্য পৰামৰ্শৰ বিষয়ে সুধিব...",
+                welcomeMessage: "নমস্কাৰ! মই আপোনাৰ স্বাস্থ্য বন্ধু। মই আপোনাক সহায় কৰিব পাৰোঁ:\n• ৰোগৰ লক্ষণ আৰু প্ৰতিৰোধ\n• টিকাদানৰ সময়সূচী\n• সাধাৰণ স্বাস্থ্য পৰামৰ্শ\n• প্ৰাথমিক চিকিৎসাৰ তথ্য\n\nআজি মই আপোনাক কেনেদৰে সহায় কৰিব পাৰোঁ?",
+                quickButtons: [
+                    "চৰ্দিৰ লক্ষণ",
+                    "শিশুৰ টিকাদান",
+                    "ডায়েবেটিছ প্ৰতিৰোধ",
+                    "তেজৰ চাপ",
+                    "প্ৰাথমিক চিকিৎসা"
+                ],
+                typingText: "AI চিন্তা কৰি আছে...",
+                emergencyText: "🚨 চিকিৎসাজনিত জৰুৰীকালীন অৱস্থাত তৎক্ষণাৎ 108 নম্বৰত ফোন কৰক"
+            }
+        };
+
+        const healthDatabase = {
+            symptoms: {
+                "cold": {
+                    en: "Common cold symptoms include runny nose, sneezing, cough, and mild fever. Rest, stay hydrated, and consult a doctor if symptoms persist.",
+                    hi: "सामान्य सर्दी के लक्षणों में बहती नाक, छींक, खांसी और हल्का बुखार शामिल है। आराम करें, पानी पिएं, और यदि लक्षण बने रहें तो डॉक्टर से सलाह लें।",
+                    bn: "সাধারণ সর্দির উপসর্গের মধ্যে রয়েছে নাক দিয়ে পানি পড়া, হাঁচি, কাশি এবং হালকা জ্বর। বিশ্রাম নিন, পানি পান করুন এবং উপসর্গ বজায় থাকলে ডাক্তারের পরামর্শ নিন।",
+                    ta: "சாதாரண சளியின் அறிகுறிகளில் மூக்கு ஒழுகுதல், தும்மல், இருமல் மற்றும் லேசான காய்ச்சல் ஆகியவை அடங்கும். ஓய்வு எடுக்கவும், நீர் அருந்தவும், அறிகுறிகள் நீடித்தால் மருத்துவரை அணுகவும்।",
+                    te: "సాధారణ జలుబు లక్షణాలలో ముక్కు కారడం, తుమ్మలు, దగ్గు మరియు తేలికపాటి జ్వరం ఉంటాయి. విశ్రాంతి తీసుకోండి, నీరు త్రాగండి మరియు లక్షణాలు కొనసాగితే వైద్యుడిని సంప్రదించండి।",
+                    mr: "सामान्य सर्दीच्या लक्षणांमध्ये नाकातून पाणी येणे, शिंकणे, खोकला आणि हलका ताप यांचा समावेश आहे. आराम करा, पाणी प्या आणि लक्षणे कायम राहिल्यास डॉक्टरांचा सल्ला घ्या।",
+                    gu: "સામાન્ય શરદીના લક્ષણોમાં નાકમાંથી પાણી વહેવું, છીંક, ખાંસી અને હળવો તાવ શામેલ છે. આરામ કરો, પાણી પીવો અને જો લક્ષણો ચાલુ રહે તો ડૉક્ટરની સલાહ લો।",
+                    kn: "ಸಾಮಾನ್ಯ ಶೀತದ ಲಕ್ಷಣಗಳು ಮೂಗಿನಿಂದ ನೀರು ಬರುವುದು, ಸೀನುವುದು, ಕೆಮ್ಮು ಮತ್ತು ಸಣ್ಣ ಜ್ವರ. ವಿಶ್ರಾಂತಿ ತೆಗೆದುಕೊಳ್ಳಿ, ನೀರು ಕುಡಿಯಿರಿ ಮತ್ತು ಲಕ್ಷಣಗಳು ಮುಂದುವರಿದರೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ।",
+                    ml: "സാധാരണ ജലദോഷത്തിന്റെ ലക്ഷണങ്ങളിൽ മൂക്കൊലിപ്പ്, തുമ്മൽ, ചുമ, നേരിയ പനി എന്നിവ ഉൾപ്പെടുന്നു. വിശ്രമിക്കുക, വെള്ളം കുടിക്കുക, ലക്ഷണങ്ങൾ നിലനിൽക്കുകയാണെങ്കിൽ ഡോക്ടറെ സമീപിക്കുക।",
+                    pa: "ਆਮ ਜ਼ੁਕਾਮ ਦੇ ਲੱਛਣਾਂ ਵਿੱਚ ਨੱਕ ਵਗਣਾ, ਛਿੰਕ, ਖੰਘ ਅਤੇ ਹਲਕਾ ਬੁਖਾਰ ਸ਼ਾਮਲ ਹੈ। ਆਰਾਮ ਕਰੋ, ਪਾਣੀ ਪੀਓ, ਅਤੇ ਜੇ ਲੱਛਣ ਬਣੇ ਰਹਿਣ ਤਾਂ ਡਾਕਟਰ ਦੀ ਸਲਾਹ ਲਓ।",
+                    or: "ସାଧାରଣ ଶୀତର ଲକ୍ଷଣରେ ନାକ ବହିବା, ଛିଙ୍କ, କାଶ ଏବଂ ହାଲୁକା ଜ୍ୱର ଅନ୍ତର୍ଭୁକ୍ତ। ବିଶ୍ରାମ ନିଅନ୍ତୁ, ପାଣି ପିଅନ୍ତୁ ଏବଂ ଲକ୍ଷଣ ରହିଲେ ଡାକ୍ତରଙ୍କ ପରାମର୍ଶ ନିଅନ୍ତୁ।",
+                    as: "সাধাৰণ চৰ্দিৰ লক্ষণসমূহৰ ভিতৰত নাকেৰে পানী ওলোৱা, হাঁচি, কাহ আৰু সামান্য জ্বৰ আছে। বিশ্ৰাম লওক, পানী খাওক আৰু লক্ষণসমূহ অব্যাহত থাকিলে চিকিৎসকৰ পৰামৰ্শ লওক।"
+                },
+                "fever": {
+                    en: "Fever is body temperature above 100.4°F (38°C). Common causes include infections. Seek medical attention if fever exceeds 103°F or lasts more than 3 days.",
+                    hi: "बुखार का मतलब शरीर का तापमान 100.4°F (38°C) से ऊपर होना है। सामान्य कारणों में संक्रमण शामिल है। यदि बुखार 103°F से अधिक हो या 3 दिन से अधिक रहे तो चिकित्सा सहायता लें।",
+                    bn: "জ্বর হল শরীরের তাপমাত্রা ১০০.৪°F (৩৮°C) এর উপরে। সাধারণ কারণগুলির মধ্যে সংক্রমণ রয়েছে। জ্বর ১০৩°F এর বেশি হলে বা ৩ দিনের বেশি স্থায়ী হলে চিকিৎসা সহায়তা নিন।",
+                    ta: "காய்ச்சல் என்பது உடல் வெப்பநிலை 100.4°F (38°C) க்கு மேல் இருப்பது. பொதுவான காரணங்களில் தொற்றுகள் அடங்கும். காய்ச்சல் 103°F ஐ மீறினால் அல்லது 3 நாட்களுக்கு மேல் நீடித்தால் மருத்துவ உதவியை நாடுங்கள்।",
+                    te: "జ్వరం అంటే శరీర ఉష్ణోగ్రత 100.4°F (38°C) కంటే ఎక్కువ. సాధారణ కారణాలలో ఇన్‌ఫెక్షన్లు ఉన్నాయి. జ్వరం 103°F మించితే లేదా 3 రోజులకు మించి ఉంటే వైద్య సహায్యం తీసుకోండి।",
+                    mr: "ताप म्हणजे शरीराचे तापमान 100.4°F (38°C) पेक्षा जास्त असणे. सामान्य कारणांमध्ये संक्रमणाचा समावेश आहे. ताप 103°F पेक्षा जास्त झाल्यास किंवा 3 दिवसांपेक्षा जास्त काळ राहिल्यास वैद्यकीय मदत घ्या।",
+                    gu: "તાવ એટલે શરીરનું તાપમાન 100.4°F (38°C) થી વધુ હોવું. સામાન્ય કારણોમાં ચેપ શામેલ છે. જો તાવ 103°F થી વધુ હોય અથવા 3 દિવસથી વધુ ટકે તો તબીબી સહાય લો।",
+                    kn: "ಜ್ವರ ಎಂದರೆ ದೇಹದ ಉಷ್ಣಾಂಶ 100.4°F (38°C) ಕ್ಕಿಂತ ಹೆಚ್ಚಾಗಿರುವುದು. ಸಾಮಾನ್ಯ ಕಾರಣಗಳಲ್ಲಿ ಸೋಂಕುಗಳು ಸೇರಿವೆ. ಜ್ವರ 103°F ಮೀರಿದರೆ ಅಥವಾ 3 ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ಕಾಲ ಇದ್ದರೆ ವೈದ್ಯಕೀಯ ಸಹಾಯವನ್ನು ಪಡೆಯಿರಿ।",
+                    ml: "പനി എന്നാൽ ശരീര താപനില 100.4°F (38°C) ന് മുകളിൽ ആകുന്നതാണ്. സാധാരണ കാരണങ്ങളിൽ അണുബാധകൾ ഉൾപ്പെടുന്നു. പനി 103°F കവിയുകയോ 3 ദിവസത്തിൽ കൂടുതൽ നിലനിൽക്കുകയോ ചെയ്താൽ വൈദ്യസഹായം തേടുക।",
+                    pa: "ਬੁਖਾਰ ਦਾ ਮਤਲਬ ਸਰੀਰ ਦਾ ਤਾਪਮਾਨ 100.4°F (38°C) ਤੋਂ ਉੱਪਰ ਹੋਣਾ ਹੈ। ਆਮ ਕਾਰਨਾਂ ਵਿੱਚ ਇਨਫੈਕਸ਼ਨ ਸ਼ਾਮਲ ਹਨ। ਜੇ ਬੁਖਾਰ 103°F ਤੋਂ ਵੱਧ ਹੋਵੇ ਜਾਂ 3 ਦਿਨਾਂ ਤੋਂ ਜ਼ਿਆਦਾ ਰਹੇ ਤਾਂ ਡਾਕਟਰੀ ਮਦਦ ਲਓ।",
+                    or: "ଜ୍ୱର ମାନେ ଶରୀରର ତାପମାତ୍ରା 100.4°F (38°C) ଉପରେ। ସାଧାରଣ କାରଣଗୁଡ଼ିକରେ ସଂକ୍ରମଣ ଅନ୍ତର୍ଭୁକ୍ତ। ଯଦି ଜ୍ୱର 103°F ଅତିକ୍ରମ କରେ କିମ୍ବା 3 ଦିନରୁ ଅଧିକ ରହେ ତେବେ ଚିକିତ୍ସା ସହାୟତା ନିଅନ୍ତୁ।",
+                    as: "জ্বৰ মানে শৰীৰৰ উষ্ণতা 100.4°F (38°C) ৰ ওপৰত। সাধাৰণ কাৰণসমূহত সংক্ৰমণ অন্তৰ্ভুক্ত। যদি জ্বৰ 103°F অতিক্ৰম কৰে বা 3 দিনতকৈ বেছি থাকে তেন্তে চিকিৎসা সহায় লওক।"
+                }
+            }
+        };
+
+        function initializeChatbot() {
+            updateLanguage();
+            addBotMessage(getCurrentContent().welcomeMessage);
+            updateQuickButtons(); // Re-enabled for health quick buttons
+            initializeSpeechRecognition();
+            
+            setTimeout(() => {
+                isConnected = true;
+                document.getElementById('connectionStatus').classList.remove('offline');
+            }, 2000);
+        }
+
+        function initializeSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.maxAlternatives = 1;
+                
+                recognition.onstart = function() {
+                    isRecording = true;
+                    document.getElementById('micBtn').classList.add('recording');
+                    showSpeechStatus('Listening... Speak now');
+                };
+                
+                recognition.onresult = function(event) {
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript;
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                    
+                    if (interimTranscript) {
+                        showSpeechStatus('Listening: ' + interimTranscript);
+                    }
+                    
+                    if (finalTranscript) {
+                        handleSpeechResult(finalTranscript.trim());
+                    }
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    stopRecording();
+                    
+                    const errorMessages = {
+                        'not-allowed': 'Microphone access denied. Please allow microphone access.',
+                        'no-speech': 'No speech detected. Please try again.',
+                        'audio-capture': 'No microphone found. Please check your microphone.',
+                        'network': 'Network error. Please check your connection.',
+                        'aborted': 'Speech recognition was aborted.'
+                    };
+                    
+                    const message = errorMessages[event.error] || 'Speech recognition error. Please try again.';
+                    showSpeechStatus(message, true);
+                };
+                
+                recognition.onend = function() {
+                    stopRecording();
+                };
+            } else {
+                // Hide microphone button if speech recognition is not supported
+                document.getElementById('micBtn').style.display = 'none';
+                console.warn('Speech recognition not supported in this browser');
+            }
+        }
+
+        function toggleSpeechRecognition() {
+            if (!recognition) {
+                showSpeechStatus('Speech recognition not supported in this browser', true);
+                return;
+            }
+            
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                startRecording();
+            }
+        }
+
+        function startRecording() {
+            try {
+                // Set language for speech recognition
+                recognition.lang = speechLanguageCodes[currentLanguage] || 'en-US';
+                recognition.start();
+            } catch (error) {
+                console.error('Error starting speech recognition:', error);
+                showSpeechStatus('Error starting speech recognition', true);
+            }
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            document.getElementById('micBtn').classList.remove('recording');
+            hideSpeechStatus();
+        }
+
+        function handleSpeechResult(transcript) {
+            document.getElementById('chatInput').value = transcript;
+            
+            // Detect language from transcript
+            const detectedLanguage = detectLanguage(transcript);
+            if (detectedLanguage && detectedLanguage !== currentLanguage) {
+                // Auto-switch language if different language detected
+                currentLanguage = detectedLanguage;
+                document.getElementById('languageSelector').value = currentLanguage;
+                updateLanguage();
+                updateQuickButtons(); // Re-enabled for health quick buttons
+                showSpeechStatus(`Language switched to ${getLanguageName(detectedLanguage)}`, false, 2000);
+            }
+            
+            // Auto-send the message after a short delay
+            setTimeout(() => {
+                if (transcript.trim()) {
+                    sendMessage();
+                }
+            }, 500);
+        }
+
+        function detectLanguage(text) {
+            for (const [langCode, pattern] of Object.entries(languagePatterns)) {
+                if (pattern.test(text)) {
+                    return langCode;
+                }
+            }
+            // Default to English if no pattern matches
+            return 'en';
+        }
+
+        function getLanguageName(langCode) {
+            const languageNames = {
+                'en': 'English',
+                'hi': 'हिन्दी',
+                'bn': 'বাংলা',
+                'ta': 'தமிழ்',
+                'te': 'తెలుగు',
+                'mr': 'मराठी',
+                'gu': 'ગુજરાતી',
+                'kn': 'ಕನ್ನಡ',
+                'ml': 'മലയാളം',
+                'pa': 'ਪੰਜਾਬੀ',
+                'or': 'ଓଡିଆ',
+                'as': 'অসমীয়া'
+            };
+            return languageNames[langCode] || 'English';
+        }
+
+        function showSpeechStatus(message, isError = false, duration = 0) {
+            const statusElement = document.getElementById('speechStatus');
+            statusElement.textContent = message;
+            statusElement.style.display = 'block';
+            statusElement.style.backgroundColor = isError ? 'rgba(244, 67, 54, 0.9)' : 'rgba(0, 0, 0, 0.8)';
+            
+            if (duration > 0) {
+                setTimeout(() => hideSpeechStatus(), duration);
+            }
+        }
+
+        function hideSpeechStatus() {
+            document.getElementById('speechStatus').style.display = 'none';
+        }
+
+        function changeLanguage() {
+            const selector = document.getElementById('languageSelector');
+            currentLanguage = selector.value;
+            updateLanguage();
+            updateQuickButtons(); // Re-enabled for health quick buttons
+        }
+
+        function updateLanguage() {
+            const currentContent = getCurrentContent();
+            document.getElementById('headerTitle').textContent = currentContent.headerTitle;
+            document.getElementById('headerSubtitle').textContent = currentContent.headerSubtitle;
+            document.getElementById('chatInput').placeholder = currentContent.inputPlaceholder;
+            document.getElementById('emergencyBanner').innerHTML = currentContent.emergencyText;
+        }
+
+        function getCurrentContent() {
+            return content[currentLanguage] || content.en;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function updateHealthQuickDropdown() {
+            const healthDropdown = document.getElementById('healthDropdown');
+            const dropdownLabel = document.querySelector('.dropdown-label');
+            const currentContent = getCurrentContent();
+            
+            // Update dropdown label based on language
+            const dropdownLabels = {
+                'en': '🩺 Quick Health Questions',
+                'hi': '🩺 त्वरित स्वास्थ्य प्रश्न',
+                'te': '🩺 త్వరిత ఆరోగ్య ప్రశ్నలు',
+                'bn': '🩺 দ্রুত স্বাস্থ্য প্রশ্ন',
+                'ta': '🩺 விரைவு சுகாதார கேள்விகள்',
+                'mr': '🩺 जलद आरोग्य प्रश्न',
+                'gu': '🩺 ઝડપી આરોગ્ય પ્રશ્નો',
+                'kn': '🩺 ತ್ವರಿತ ಆರೋಗ್ಯ ಪ್ರಶ್ನೆಗಳು',
+                'ml': '🩺 വേഗത്തിലുള്ള ആരോഗ്യ ചോദ്യങ്ങൾ',
+                'pa': '🩺 ਤੇਜ਼ ਸਿਹਤ ਸਵਾਲ',
+                'or': '🩺 ଶୀଘ୍ର ସ୍ୱାସ୍ଥ୍ୟ ପ୍ରଶ୍ନ',
+                'as': '🩺 দ্ৰুত স্বাস্থ্য প্ৰশ্ন'
+            };
+            
+            dropdownLabel.textContent = dropdownLabels[currentLanguage] || dropdownLabels['en'];
+            
+            // Clear existing options except the first one
+            const placeholderTexts = {
+                'en': 'Select a health topic...',
+                'hi': 'एक स्वास्थ्य विषय चुनें...',
+                'te': 'ఆరోగ్య విषయం ఎంచుకోండి...',
+                'bn': 'একটি স্বাস্থ্য বিষয় নির্বাচন করুন...',
+                'ta': 'ஒரு சுகாதார தலைப்பைத் தேர்ந்தெடுக்கவும்...',
+                'mr': 'आरोग्य विषय निवडा...',
+                'gu': 'આરોગ્ય વિષય પસંદ કરો...',
+                'kn': 'ಆರೋಗ್ಯ ವಿಷಯವನ್ನು ಆಯ್ಕೆಮಾಡಿ...',
+                'ml': 'ഒരു ആരോഗ്യ വിഷയം തിരഞ്ഞെടുക്കുക...',
+                'pa': 'ਇੱਕ ਸਿਹਤ ਵਿਸ਼ਾ ਚੁਣੋ...',
+                'or': 'ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟ ବାଛନ୍ତୁ...',
+                'as': 'এটা স্বাস্থ্য বিষয় বাছক...'
+            };
+            
+            healthDropdown.innerHTML = `<option value="">${placeholderTexts[currentLanguage] || placeholderTexts['en']}</option>`;
+            
+            if (currentContent.healthCategories) {
+                currentContent.healthCategories.forEach(category => {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = `${category.icon} ${category.title}`;
+                    
+                    category.buttons.forEach(buttonText => {
+                        const option = document.createElement('option');
+                        option.value = buttonText;
+                        option.textContent = buttonText;
+                        optgroup.appendChild(option);
+                    });
+                    
+                    healthDropdown.appendChild(optgroup);
+                });
+            }
+        }
+
+        function handleHealthDropdownChange() {
+            const dropdown = document.getElementById('healthDropdown');
+            const selectedValue = dropdown.value;
+            
+            if (selectedValue) {
+                sendQuickMessage(selectedValue);
+                // Reset dropdown to default
+                dropdown.value = "";
+            }
+        }
+
+        function updateQuickButtons() {
+            // Legacy function - now redirects to health dropdown
+            updateHealthQuickDropdown();
+        }
+
+        function addMessage(message, isUser = false) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = isUser ? '👤' : '🏥';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            if (!isUser && message.includes('•')) {
+                content.innerHTML = message.replace(/\n/g, '<br>');
+            } else {
+                content.textContent = message;
+            }
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addBotMessage(message) {
+            addMessage(message, false);
+        }
+
+        function addUserMessage(message) {
+            addMessage(message, true);
+        }
+
+        function showTyping() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.style.display = 'flex';
+            typingIndicator.querySelector('.typing-dots').textContent = getCurrentContent().typingText;
+        }
+
+        function hideTyping() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        async function getAIResponse(userMessage) {
+            try {
+                 const response = await fetch('http://localhost:5000/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        language: currentLanguage,
+                        user_id: 'web-user-' + Date.now()
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                return data.response;
+            } catch (error) {
+                console.error('Error connecting to backend:', error);
+                throw error; 
+            }
+        }
+
+        function simulateAIResponse(userMessage) {
+            showTyping();
+            
+            getAIResponse(userMessage)
+                .then(response => {
+                    hideTyping();
+                    addBotMessage(response);
+                    isConnected = true;
+                    document.getElementById('connectionStatus').classList.remove('offline');
+                })
+                .catch(() => {
+                    hideTyping();
+                    const response = generateResponse(userMessage.toLowerCase());
+                    addBotMessage(response + "\n\n⚠️ Using offline mode - some features may be limited");
+                    isConnected = false;
+                    document.getElementById('connectionStatus').classList.add('offline');
+                });
+        }
+
+        function generateResponse(message) {
+            if (message.includes('cold') || message.includes('सर्दी') || message.includes('সর্দি') || message.includes('சளி') || 
+                message.includes('జలుబు') || message.includes('सर्दी') || message.includes('શરદી') || message.includes('ಶೀತ') ||
+                message.includes('ജലദോഷം') || message.includes('ਜ਼ੁਕਾਮ') || message.includes('ଶୀତ') || message.includes('চৰ্দি')) {
+                return healthDatabase.symptoms.cold[currentLanguage] || healthDatabase.symptoms.cold.en;
+            }
+            
+            if (message.includes('fever') || message.includes('बुखार') || message.includes('জ্বর') || message.includes('காய்ச்சல்') ||
+                message.includes('జ్వరం') || message.includes('ताप') || message.includes('તાવ') || message.includes('ಜ್ವರ') ||
+                message.includes('പനി') || message.includes('ਬੁਖਾਰ') || message.includes('ଜ୍ୱର') || message.includes('জ্বৰ')) {
+                return healthDatabase.symptoms.fever[currentLanguage] || healthDatabase.symptoms.fever.en;
+            }
+            
+            const fallbackResponses = {
+                en: "I'd be happy to help you! Please ask more specific questions about symptoms, vaccination schedules, or prevention tips. You can also use the quick buttons above.",
+                hi: "मुझे खुशी होगी आपकी मदद करना में! कृपया लक्षणों, टीकाकरण या रोकथाम के सुझावों के बारे में और अधिक विशिष्ट प्रश्न पूछें। आप ऊपर दिए गए त्वरित बटनों का भी उपयोग कर सकते हैं।",
+                bn: "আমি আপনাকে সাহায্য করতে পেরে খুশি হব! দয়া করে উপসর্গ, টিকাদানের সময়সূচী, বা প্রতিরোধের টিপস সম্পর্কে আরও নির্দিষ্ট প্রশ্ন জিজ্ঞাসা করুন। আপনি উপরের দ্রুত বোতামগুলিও ব্যবহার করতে পারেন।",
+                ta: "உங்களுக்கு உதவ நான் மகிழ்ச்சியடைகிறேன்! அறிகுறிகள், தடுப்பூசி அட்டவணைகள் அல்லது தடுப்பு குறிப்புகள் பற்றி மேலும் குறிப்பிட்ட கேள்விகளைக் கேளுங்கள். மேலே உள்ள விரைவு பொத்தான்களையும் நீங்கள் பயன்படுத்தலாம்.",
+                te: "నేను మీకు సహాయం చేయడానికి సంతోషిస్తాను! దయచేసి లక్షణాలు, టీకా కార్యక్రమాలు లేదా నివారణ చిట్కాల గురించి మరింత నిర్దిష్ట ప్రశ్నలు అడగండి. మీరు పైన ఉన్న త్వరిత బటన్లను కూడా ఉపయోగించవచ్చు.",
+                mr: "मी तुम्हाला मदत करण्यास आनंदी आहे! कृपया लक्षणे, लसीकरण वेळापत्रक किंवा प्रतिबंधात्मक टिप्सबद्दल अधिक विशिष्ट प्रश्न विचारा. तुम्ही वरील जलद बटणे देखील वापरू शकता.",
+                gu: "હું તમને મદદ કરવા માટે ખુશ છું! કૃપા કરીને લક્ષણો, રસીકરણ કાર્યક્રમો અથવા નિવારણ ટિપ્સ વિશે વધુ ચોક્કસ પ્રશ્નો પૂછો. તમે ઉપરના ઝડપી બટનોનો પણ ઉપયોગ કરી શકો છો.",
+                kn: "ನಿಮಗೆ ಸಹಾಯ ಮಾಡಲು ನಾನು ಸಂತೋಷಪಡುತ್ತೇನೆ! ದಯವಿಟ್ಟು ರೋಗಲಕ್ಷಣಗಳು, ಲಸಿಕೆ ವೇಳಾಪಟ್ಟಿಗಳು ಅಥವಾ ತಡೆಗಟ್ಟುವಿಕೆ ಸಲಹೆಗಳ ಬಗ್ಗೆ ಹೆಚ್ಚು ನಿರ್ದಿಷ್ಟ ಪ್ರಶ್ನೆಗಳನ್ನು ಕೇಳಿ. ನೀವು ಮೇಲಿನ ತ್ವರಿತ ಬಟನ್‌ಗಳನ್ನು ಸಹ ಬಳಸಬಹುದು.",
+                ml: "നിങ്ങളെ സഹായിക്കാൻ ഞാൻ സന്തോഷിക്കുന്നു! ദയവായി രോഗലക്ഷണങ്ങൾ, വാക്സിനേഷൻ ഷെഡ്യൂളുകൾ, അല്ലെങ്കിൽ പ്രതിരോധ നുറുങ്ങുകൾ എന്നിവയെക്കുറിച്ച് കൂടുതൽ നിർദ്ദിഷ്ട ചോദ്യങ്ങൾ ചോദിക്കുക. നിങ്ങൾക്ക് മുകളിലുള്ള ദ്രുത ബട്ടണുകളും ഉപയോഗിക്കാം.",
+                pa: "ਮੈਂ ਤੁਹਾਡੀ ਮਦਦ ਕਰਕੇ ਖੁਸ਼ ਹੋਵਾਂਗਾ! ਕਿਰਪਾ ਕਰਕੇ ਲੱਛਣਾਂ, ਟੀਕਾਕਰਨ ਸਮਾ-ਸੂਚੀ, ਜਾਂ ਰੋਕਥਾਮ ਟਿਪਸ ਬਾਰੇ ਹੋਰ ਖਾਸ ਸਵਾਲ ਪੁੱਛੋ। ਤੁਸੀਂ ਉੱਪਰ ਦਿੱਤੇ ਤੇਜ਼ ਬਟਨਾਂ ਦੀ ਵੀ ਵਰਤੋਂ ਕਰ ਸਕਦੇ ਹੋ।",
+                or: "ମୁଁ ଆପଣଙ୍କୁ ସାହାଯ୍ୟ କରିବାକୁ ଖୁସି ହେବି! ଦୟାକରି ଲକ୍ଷଣ, ଟୀକାକରଣ କାର୍ଯ୍ୟସୂଚୀ, କିମ୍ବା ପ୍ରତିରୋଧ ପରାମର୍ଶ ବିଷୟରେ ଅଧିକ ନିର୍ଦ୍ଦିଷ୍ଟ ପ୍ରଶ୍ନ ପଚାରନ୍ତୁ। ଆପଣ ଉପରୋକ୍ତ ତୁରନ୍ତ ବଟନ୍ ମଧ୍ୟ ବ୍ୟବହାର କରିପାରିବେ।",
+                as: "মই আপোনাক সহায় কৰিবলৈ সুখী হ'ম! অনুগ্ৰহ কৰি লক্ষণ, টিকাকৰণৰ সময়সূচী, বা প্ৰতিৰোধৰ টিপছৰ বিষয়ে অধিক সুনির্দিষ্ট প্ৰশ্ন সুধক। আপুনি ওপৰৰ দ্ৰুত বুটামবোৰো ব্যৱহাৰ কৰিব পাৰে।"
+            };
+            return fallbackResponses[currentLanguage] || fallbackResponses.en;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (message === '') return;
+
+            addUserMessage(message);
+            simulateAIResponse(message);
+            input.value = '';
+        }
+
+        function sendQuickMessage(message) {
+            // Quick message functionality removed
+            /*
+            addUserMessage(message);
+            simulateAIResponse(message);
+            */
+        }
+
+        function sendQuickMessage(message) {
+            addUserMessage(message);
+            simulateAIResponse(message);
+        }
+
+        // Notification System
+        let notifications = [
+            {
+                id: 1,
+                title: "COVID-19 Booster Drive",
+                content: "Free COVID-19 booster shots available at Community Health Center. No appointment needed.",
+                time: "2 hours ago",
+                isRead: false,
+                type: "vaccination"
+            },
+            {
+                id: 2,
+                title: "Child Immunization Camp",
+                content: "Free vaccination camp for children (0-5 years) this Saturday 9 AM - 4 PM at Village School.",
+                time: "5 hours ago",
+                isRead: false,
+                type: "vaccination"
+            },
+            {
+                id: 3,
+                title: "Flu Season Alert",
+                content: "Seasonal flu vaccinations now available. Protect yourself and your family this winter.",
+                time: "1 day ago",
+                isRead: false,
+                type: "health-alert"
+            },
+            {
+                id: 4,
+                title: "Health Checkup Camp",
+                content: "Free basic health screening camp next week. Blood pressure, diabetes, and BMI checks.",
+                time: "2 days ago",
+                isRead: true,
+                type: "health-camp"
+            }
+        ];
+
+        function updateNotificationBadge() {
+            const unreadCount = notifications.filter(n => !n.isRead).length;
+            const badge = document.getElementById('notificationBadge');
+            
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function renderNotifications() {
+            const notificationList = document.getElementById('notificationList');
+            const currentContent = getCurrentContent();
+            
+            // Get notification types based on language
+            const notificationTypes = {
+                'vaccination': {
+                    'en': '💉 Vaccination',
+                    'hi': '💉 टीकाकरण',
+                    'te': '💉 టీకాలు',
+                    'bn': '💉 টিকাদান'
+                },
+                'health-alert': {
+                    'en': '⚠️ Health Alert',
+                    'hi': '⚠️ स्वास्थ्य चेतावनी',
+                    'te': '⚠️ ఆరోగ్య హెచ్చరిక',
+                    'bn': '⚠️ স্বাস্থ্য সতর্কতা'
+                },
+                'health-camp': {
+                    'en': '🏥 Health Camp',
+                    'hi': '🏥 स्वास्थ्य शिविर',
+                    'te': '🏥 ఆరోగ్య శిబిరం',
+                    'bn': '🏥 স্বাস্থ্য শিবির'
+                }
+            };
+
+            notificationList.innerHTML = '';
+            
+            // Show only recent notifications (max 5)
+            const recentNotifications = notifications.slice(0, 5);
+            
+            recentNotifications.forEach(notification => {
+                const notificationItem = document.createElement('div');
+                notificationItem.className = `notification-item ${!notification.isRead ? 'unread' : ''}`;
+                
+                const typeIcon = notificationTypes[notification.type]?.[currentLanguage] || 
+                               notificationTypes[notification.type]?.['en'] || '📢';
+                
+                notificationItem.innerHTML = `
+                    <div class="notification-title">${typeIcon}</div>
+                    <div class="notification-content">${notification.content}</div>
+                    <div class="notification-time">${notification.time}</div>
+                `;
+                
+                notificationItem.onclick = () => markAsRead(notification.id);
+                notificationList.appendChild(notificationItem);
+            });
+        }
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            const isVisible = dropdown.classList.contains('show');
+            
+            if (isVisible) {
+                dropdown.classList.remove('show');
+            } else {
+                dropdown.classList.add('show');
+                renderNotifications();
+            }
+        }
+
+        function markAsRead(notificationId) {
+            const notification = notifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.isRead = true;
+                updateNotificationBadge();
+                renderNotifications();
+            }
+        }
+
+        function showAllNotifications() {
+            // This could open a modal or navigate to a dedicated notifications page
+            alert('Full notifications page would open here. All vaccination drives and health updates would be displayed.');
+        }
+
+        // Close notification dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const notificationContainer = document.querySelector('.notification-container');
+            const dropdown = document.getElementById('notificationDropdown');
+            
+            if (!notificationContainer.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Add new notification (this could be called from a backend API)
+        function addNewNotification(title, content, type = 'health-alert') {
+            const newNotification = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                time: 'Just now',
+                isRead: false,
+                type: type
+            };
+            
+            notifications.unshift(newNotification);
+            updateNotificationBadge();
+            
+            // Show a brief toast notification
+            showToast(`New notification: ${title}`);
+        }
+
+        function showToast(message) {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                z-index: 1002;
+                font-size: 14px;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Simulate receiving new notifications (for demo purposes)
+        function simulateNewNotifications() {
+            const demoNotifications = [
+                {
+                    title: "Hepatitis B Vaccination Drive",
+                    content: "Free Hepatitis B vaccination available at District Hospital tomorrow 10 AM - 6 PM.",
+                    type: "vaccination"
+                },
+                {
+                    title: "Monsoon Health Advisory",
+                    content: "Protect yourself from waterborne diseases. Boil water before drinking.",
+                    type: "health-alert"
+                }
+            ];
+            
+            // Add a new notification every 30 seconds for demo
+            setTimeout(() => {
+                const randomNotification = demoNotifications[Math.floor(Math.random() * demoNotifications.length)];
+                addNewNotification(randomNotification.title, randomNotification.content, randomNotification.type);
+            }, 30000);
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeChatbot);
+
+        document.getElementById('sendButton').addEventListener('click', sendMessage);
+
+        document.getElementById('chatInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Initialize notifications on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNotificationBadge();
+            renderNotifications();
+            // simulateNewNotifications(); // Uncomment for demo mode
+        });
+   
+        setTimeout(monitorNetworkStatus, 10000); 
+    </script>
+</body>
+</html>
