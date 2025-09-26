@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
 
-# GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'your-gemini-api-key-here')
-genai.configure(api_key="AIzaSyBX_gDrLlH_yFZgN2_6LPOFoC531ijhZXM")
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'your-gemini-api-key-here')
+genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-2.5-flash')
 
 class HealthDatabase:

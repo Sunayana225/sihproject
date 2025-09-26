@@ -13,7 +13,7 @@ class AIHealthAssistant:
     
     def __init__(self):
         # Configure Gemini AI
-        api_key = os.getenv("GEMINI_API_KEY", "AIzaSyBX_gDrLlH_yFZgN2_6LPOFoC531ijhZXM")
+        api_key = os.getenv("GEMINI_API_KEY", "your-gemini-api-key-here")
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel('gemini-2.5-flash')
         

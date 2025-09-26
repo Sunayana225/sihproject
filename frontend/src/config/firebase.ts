@@ -6,13 +6,13 @@ import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyA9_HiVzTQNxTYWcf0I_p6ZztGVNIJwHbU",
-  authDomain: "realestate-456c4.firebaseapp.com",
-  projectId: "realestate-456c4",
-  storageBucket: "realestate-456c4.firebasestorage.app",
-  messagingSenderId: "628551361975",
-  appId: "1:628551361975:web:b1b142fc82678d11af3432",
-  measurementId: "G-VT0F7YRT1H"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "your-firebase-api-key",
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "your-project.firebaseapp.com",
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "your-project-id",
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "your-project.firebasestorage.app",
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "your-sender-id",
+  appId: process.env.REACT_APP_FIREBASE_APP_ID || "your-app-id",
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID || "your-measurement-id"
 };
 
 // Initialize Firebase

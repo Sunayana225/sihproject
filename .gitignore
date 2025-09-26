@@ -29,6 +29,9 @@ ENV/
 # Environment variables
 .env
 *.env
+!.env.example
+backend/sih/.env
+frontend/.env
 
 # Database
 *.db
